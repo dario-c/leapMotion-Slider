@@ -1,0 +1,69 @@
+// :: UTILS
+// --------------------------------------------------
+
+// Vertical align center - NON-TABLE
+// .vertical-align-parent {
+//     height: 100%;
+    
+//     &:before
+//     {
+//         content: '';
+//         display: inline-block;
+//         height: 100%;
+//         vertical-align: middle;
+//         margin-right: -3px; /* Adjusts for spacing */
+//     }
+// }
+
+// .vertical-align-child{
+//     display: inline-block;
+//     vertical-align: middle; 
+//     width: 100%;
+// }
+
+// Vertical align center - TABLE
+.vertical-align-parent {
+    display: table;
+    width: 100%;
+    height: 100%;
+}
+
+.vertical-align-child{
+    display: table-cell;
+    vertical-align: middle; 
+    width: 100%;
+    height: 100%;
+}
+
+// Smoother font rendering
+.font-smoothing {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+// Visibility
+.is-hidden { display: none; visibility: hidden;}
+.is-visible { display: block; visibility: visible;}
+
+.hide-text {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+}
+
+// Horizontal list
+/*ul/ol/dl*/.inline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    
+    li {
+        margin: 0;
+        padding: 0;
+    }
+}

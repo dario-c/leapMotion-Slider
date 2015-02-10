@@ -1,0 +1,37 @@
+
+// PROJECTS FONTS
+
+//<!-- LOAD FROM GOOGLE SERVER -->
+//<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700">
+
+// How to use:
+// font-family: "regular", sans-serif;
+@path: "../fonts/source-sans-pro";
+@fonts: "bold","extralight","light","regular", "semibold";
+@filenames: "sourcesanspro-bold-webfont","sourcesanspro-extralight-webfont","sourcesanspro-light-webfont","sourcesanspro-regular-webfont", "sourcesanspro-semibold-webfont";
+@svdids: "source_sans_probold","source_sans_proextralight","source_sans_prolight","source_sans_proregular", "source_sans_prosemibold"; // These can be found in the svg files of the fonts -> <font id="source_sans_probold" ..>
+@weights: 700, 200, 300, 400, 600;
+
+// Loop creates the appropriate @font-face reference for each font file
+.example_module {
+    .-(@i: length(@fonts)) when (@i > 0)
+    {
+        @name: e(extract(@fonts, @i));
+        @filename: e(extract(@filenames, @i));
+        @svgid: e(extract(@svdids, @i));
+        @weight: e(extract(@weights, @i));
+
+        @font-face {
+            font-family: "@{name}";
+            src: url("@{path}/@{name}/@{filename}.eot");
+            src: url("@{path}/@{name}/@{filename}.eot?#iefix") format("embedded-opentype"),
+                 url("@{path}/@{name}/@{filename}.svg#@{svgid}") format("svg"),
+                 url("@{path}/@{name}/@{filename}.woff") format("woff"),
+                 url("@{path}/@{name}/@{filename}.ttf") format("truetype");
+            font-weight: "@{weight}";
+            font-style: normal;
+        }
+
+        .-((@i - 1));
+    } .-;
+}

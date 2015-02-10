@@ -1,0 +1,206 @@
+
+/* @Usage:        Base styles
+* @Description:  Styling of default elements. So no .classes and #id's.
+* @Code style:   http://smacss.com/
+// ---------------------------------------------------------------------- */
+
+html, body {}
+
+body {}
+
+/* :: BLOCK LEVEL ELEMENTS
+// -------------------------*/
+    h1, h2, h3, h4, h5, h6 {
+        a {}
+    }
+
+    h1 {}
+    h2 {}
+    h3 {}
+    h4 {}
+    h5 {}
+    h6 {}
+
+    div {}
+    section {}
+    article {}
+    aside {}
+    header {}
+    footer {}
+
+    map {}
+
+    ol {}
+    ul {}
+    li {}
+    dd {}
+    dl {}
+    dt {}
+
+    blockquote {}
+
+    hgroup {}
+
+    p {}
+
+    hr {}
+
+    pre {}
+    progress {}
+    output {}
+
+    form {}
+    textarea {}
+    fieldset {}
+    button {
+        &:focus {}
+    }
+
+    figure {}
+    figcaption {}
+    embed {}
+    video { }
+    object {}
+    canvas {}
+
+    table {}
+    caption {}
+    colgroup {}
+    col {}
+    tr {}
+    th {}
+    thead {}
+    tbody {}
+    tfoot {}
+
+/* :: INLINE ELEMENTS
+// ----------------------------*/
+    a,
+    button {
+        
+        &:visited {}
+        &:hover,
+        &:active,
+        &:focus {}
+    }
+
+    button {
+        &:hover,
+        &:active,
+        &:focus {}
+    }
+
+    nav {}
+
+    label {}
+    legend {}
+    input {}
+    select {}
+    optgroup {}
+    option {}
+    datalist {}
+
+    abbr {}
+    cite {}
+    q {}
+
+    dfn {}
+    code {}
+    samp {}
+    kbd {}
+    var {}
+    source {}
+
+    address {}
+    area {}
+    mark {}
+    audio {}
+
+    code {}
+
+    del {}
+    ins {}
+
+    details {}
+    summary {}
+    details > summary {}
+
+    small {}
+
+    img {}
+    span {}
+    em {}
+    strong {}
+    i {}
+    sup {}
+    sub {}
+
+    iframe {}
+
+    tbody {}
+    td {}
+
+    kbd {}
+    var {}
+
+/* :: FORM ELEMENTS
+// -------------------------*/
+    form {}
+
+    fieldset {}
+    legend {}
+    label {
+        &[for] {}
+    }
+
+    input[type="email"],
+    input[type="number"],
+    input[type="password"],
+    input[type="search"],
+    input[type="tel"],
+    input[type="text"],
+    input[type="url"],
+    input[type="color"],
+    input[type="checkbox"],
+    input[type="date"],
+    input[type="datetime"],
+    input[type="datetime-local"],
+    input[type="month"],
+    input[type="time"],
+    input[type="week"],
+    textarea,
+    select {
+        &:focus {
+        }
+    }
+
+    input[type=color],
+    input[type=file],
+    input[type=range],
+    select {}
+
+    select {}
+
+    optgroup,
+    option {}
+
+    input[type=submit] {}
+
+    form input[type=submit] {}
+
+    /* Placeholder style - NOT Combined selectors because it disables styles in FF */
+    ::-webkit-input-placeholder {}
+    input:-moz-placeholder,
+    textarea:-moz-placeholder {}
+
+    /* :: TABLE ELEMENTS
+    // -------------------------*/
+    table {}
+
+    thead {}
+    tfoot {}
+    tbody {}
+
+    thead th {}
+    tfoot td {}
+    tbody td {}

@@ -1,0 +1,15 @@
+{
+  "name": "raw-diamonds",
+  "version": "0.1.0",
+  "authors": [
+    "Caviar Digital"
+  ],
+  "description": "raw-diamonds",
+  "moduleType": [
+    "globals"
+  ],
+  "license": "-",
+  "homepage": "raw-diamonds.dev",
+  "private": true,
+  "dependencies": {"jquery":"latest"}
+}
