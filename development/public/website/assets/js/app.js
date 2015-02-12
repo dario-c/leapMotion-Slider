@@ -14,6 +14,7 @@
 
         var init = function ()
         {
+            ns.slider = new ns.Slider();
         };
 
         init();

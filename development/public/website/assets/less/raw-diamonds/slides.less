@@ -1,0 +1,86 @@
+
+/* @Usage:        Project styles
+* @Description:  Project specific styling 
+// ---------------------------------------------------------------------- */
+@red: red;
+
+@position-body: 80% ;
+@margin: 10%;
+@reduce-margin: 0;
+
+ 
+
+#wrap {
+  width: 50%;
+  max-height: 100%;
+  //margin-top: 200px;
+  margin: 0 auto;
+}
+
+.frame {
+  position: relative;
+  // border: 1px solid red;
+  width: 100%;
+  padding-bottom: 100%;
+  overflow: hidden;
+}
+
+#wrap > div > div { 
+  width: 80%;
+  height: 80%;
+  position: absolute;
+  transition: all 1s;
+}
+
+
+.topmost {
+  top: -(@position-body * 2 + @margin - @reduce-margin * 2) 
+} 
+
+.top {
+  top: -@position-body + @reduce-margin;
+}
+
+
+.center {
+  top: @margin;
+}
+
+
+.bottom {
+  top: @margin + @position-body + @margin - @reduce-margin;
+}
+
+.bottommost {
+  top: @margin + @position-body + @margin + @position-body + @margin - @reduce-margin * 2;
+}
+
+
+.leftest {
+  left: -(@position-body + @margin + @position-body) + @reduce-margin * 2;
+}
+
+.left {
+  left: -@position-body + @reduce-margin
+}
+
+.middle {
+  left: @margin;
+}
+
+.right {
+  left: @margin + @position-body + @margin - @reduce-margin;
+}
+
+.rightest {
+  left: @margin + @position-body + @margin + @position-body + @margin - @reduce-margin * 2;
+}
+
+.rightest, .leftest, .bottommost, .topmost {
+  display: none;
+}
+
+img {
+  width: 100%
+}
+
