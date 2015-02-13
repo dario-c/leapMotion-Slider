@@ -66,9 +66,7 @@
       }
 
         var init = function (){
-          var track = true;
-          var direction;
-
+          var animating = false;
 
           var controller = new Leap.Controller();
 
@@ -79,127 +77,77 @@
               var translationX = translation[0];
               var translationY = translation[1];
               
-              var translationThreshold = 100;  //threshold translation
-              var velocity = hand.palmVelocity[0];
+              var translationThreshold = 100;
 
-              // Used only for Canvas
-              var speedLevel = (translationX * 800) / translationThreshold;
-              drawRectangle(Math.abs(Math.round(speedLevel)));
+                var horizontal = Math.abs(translationX) > Math.abs(translationY) ? true : false;
 
+                    if(!animating){
 
-                  // If hand slows down enough, make it possible to swipe again
-                  if(!track && velocity > -20 && velocity < 20 ){
-                    track = true;
-                    clearCanvas();
-                  }
+                      if(horizontal) {
 
-                  // If hand slows a lot, allow to swipe on any direcition
-                  if(velocity > -5 && velocity < 5 ){
-                    console.log("all directions");
-                    direction = "";
-                  }
+                        if(translationX < -translationThreshold) {
+                          animate("left");
+                        }
+                        if(translationX > translationThreshold)  {
+                          animate("right");
+                        }
+                       } else {
 
-                  // If new swipe is possible, translation is enough and direction correct: swipe
-                  if(track) {
-                    var horizontal = Math.abs(translationX) > Math.abs(translationY) ? true : false;
+                        if(translationY < -translationThreshold) {
+                          animate("down");
+                        }
 
-                    if(horizontal) {
+                        if(translationY > translationThreshold ) {
+                          animate("up");
+
+                        }
+                      }
                       
-                      if(translationX < -translationThreshold && direction !== "right") {
-                        stepLeft();
-                        direction = "left";
-                        track = false;
-                        animation = true;
-                        console.log(direction);
-                      }
-
-                      if(translationX > translationThreshold  && direction !== "left") {
-                        stepRight();
-                        direction = "right";
-                        track = false;
-                        console.log(direction);
-                      }
-                     } else {
-
-                      if(translationY < -translationThreshold && direction !== "right") {
-                        slide(rows, posibleYPositions, false); // down
-                        track = false;
-                        console.log(direction);
-                      }
-
-                      if(translationY > translationThreshold  && direction !== "left") {
-                        slide(rows, posibleYPositions, true); // up
-                        direction = "right";
-                        track = false;
-                        console.log(direction);
-                      }
-
                     }
-                  
-                  }
                 }
-              });
-
-              controller.use("handEntry").on("handLost", function() {
-                track = true;
-                clearCanvas();
               });
 
               controller.connect();
 
+              function animate(direction) {
+                switch(direction){
+                  case "left":
+                    slide(columns, posibleXPositions, false); // left
+                    break;
+                  case "up":
+                    slide(rows, posibleYPositions, true); // up
+                    break;
+                  case "right":
+                    slide(columns, posibleXPositions, true); // right
+                    break;
+                  case "down":
+                    slide(rows, posibleYPositions, false); // down
+                    break;
+                }
+                animating = true;
 
+                window.setTimeout(function(){
+                  animating = false;
+                }, 1000);
 
-              function stepLeft() {
-                slide(columns, posibleXPositions, false);
               }
 
-              function stepRight() {
-                slide(columns, posibleXPositions, true);
-              }
-
-              function drawRectangle(width) {
-                var green = "#00CC00";
-                var yellow = "#FFFF00";
-
-                var canvas = document.getElementById("canvas");
-                var ctx = canvas.getContext("2d");
-                ctx.clearRect (0, 0, 800, 800);
-                ctx.beginPath();
-                ctx.rect(0, 780, width, 20, Math.PI * 2, true);
-
-                var gradient = ctx.createLinearGradient(0, 780, width, 20);
-                gradient.addColorStop(0, yellow);
-                gradient.addColorStop(1, green);
-
-                ctx.fillStyle = gradient;
-                ctx.fill();
-                ctx.lineWidth = 1;
-                ctx.strokeStyle = "#003300";
-                ctx.stroke();
-              }
-
-              function clearCanvas(){
-                var canvas = document.getElementById("canvas");
-                var ctx = canvas.getContext("2d");
-                ctx.clearRect (0, 0, 800, 800);
-              }
-          
-          $("body").on("keydown", function(key){
-            switch(key.keyCode){
-              case 37:
-                slide(columns, posibleXPositions, false); // left
-                break;
-              case 38:
-                slide(rows, posibleYPositions, true); // up
-                break;
-              case 39:
-                slide(columns, posibleXPositions, true); // right
-                break;
-              case 40:
-                slide(rows, posibleYPositions, false); // down
-                break;
-            }
-          });
+              $("body").on("keydown", function(key){
+                switch(key.keyCode){
+                  case 37:
+                    animate("left");
+                    break;
+                  case 38:
+                    animate("up");
+                    break;
+                  case 39:
+                    animate("right");
+                    break;
+                  case 40:
+                    animate("down");
+                    break;
+                }
+              });
         };
 
         init();
