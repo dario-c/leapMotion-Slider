@@ -8,8 +8,6 @@
 @margin: 10%;
 @reduce-margin: 0;
 
- 
-
 #wrap {
   width: 50%;
   max-height: 100%;
@@ -20,6 +18,7 @@
 .frame {
   position: relative;
   // border: 1px solid red;
+  background: url("../images/wall.jpg");
   width: 100%;
   padding-bottom: 100%;
   overflow: hidden;
@@ -32,7 +31,6 @@
   transition: all 1s;
 }
 
-
 .topmost {
   top: -(@position-body * 2 + @margin - @reduce-margin * 2) 
 } 
@@ -41,11 +39,9 @@
   top: -@position-body + @reduce-margin;
 }
 
-
 .center {
   top: @margin;
 }
-
 
 .bottom {
   top: @margin + @position-body + @margin - @reduce-margin;
@@ -54,7 +50,6 @@
 .bottommost {
   top: @margin + @position-body + @margin + @position-body + @margin - @reduce-margin * 2;
 }
-
 
 .leftest {
   left: -(@position-body + @margin + @position-body) + @reduce-margin * 2;

@@ -8,7 +8,6 @@ window.Caviar = window.Caviar || {};
     // Set global flags
     ns.DEBUG = false;
     ns.body = document.body;
-
     // Events that can get dispatched
     ns.eventNames = {
         RESIZE : "application:RESIZE"

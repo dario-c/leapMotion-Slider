@@ -66,6 +66,124 @@
       }
 
         var init = function (){
+          var track = true;
+          var direction;
+
+
+          var controller = new Leap.Controller();
+
+          controller.on("frame", function(frame){
+            if(frame.hands.length > 0){
+              var hand = frame.hands[0];
+              var translation = hand.translation(controller.frame(10));
+              var translationX = translation[0];
+              var translationY = translation[1];
+              
+              var translationThreshold = 100;  //threshold translation
+              var velocity = hand.palmVelocity[0];
+
+              // Used only for Canvas
+              var speedLevel = (translationX * 800) / translationThreshold;
+              drawRectangle(Math.abs(Math.round(speedLevel)));
+
+
+                  // If hand slows down enough, make it possible to swipe again
+                  if(!track && velocity > -20 && velocity < 20 ){
+                    track = true;
+                    clearCanvas();
+                  }
+
+                  // If hand slows a lot, allow to swipe on any direcition
+                  if(velocity > -5 && velocity < 5 ){
+                    console.log("all directions");
+                    direction = "";
+                  }
+
+                  // If new swipe is possible, translation is enough and direction correct: swipe
+                  if(track) {
+                    var horizontal = Math.abs(translationX) > Math.abs(translationY) ? true : false;
+
+                    if(horizontal) {
+                      
+                      if(translationX < -translationThreshold && direction !== "right") {
+                        stepLeft();
+                        direction = "left";
+                        track = false;
+                        animation = true;
+                        console.log(direction);
+                      }
+
+                      if(translationX > translationThreshold  && direction !== "left") {
+                        stepRight();
+                        direction = "right";
+                        track = false;
+                        console.log(direction);
+                      }
+                     } else {
+
+                      if(translationY < -translationThreshold && direction !== "right") {
+                        slide(rows, posibleYPositions, false); // down
+                        track = false;
+                        console.log(direction);
+                      }
+
+                      if(translationY > translationThreshold  && direction !== "left") {
+                        slide(rows, posibleYPositions, true); // up
+                        direction = "right";
+                        track = false;
+                        console.log(direction);
+                      }
+
+                    }
+                  
+                  }
+                }
+              });
+
+              controller.use("handEntry").on("handLost", function() {
+                track = true;
+                clearCanvas();
+              });
+
+              controller.connect();
+
+
+
+              function stepLeft() {
+                slide(columns, posibleXPositions, false);
+              }
+
+              function stepRight() {
+                slide(columns, posibleXPositions, true);
+              }
+
+              function drawRectangle(width) {
+                var green = "#00CC00";
+                var yellow = "#FFFF00";
+
+                var canvas = document.getElementById("canvas");
+                var ctx = canvas.getContext("2d");
+                ctx.clearRect (0, 0, 800, 800);
+                ctx.beginPath();
+                ctx.rect(0, 780, width, 20, Math.PI * 2, true);
+
+                var gradient = ctx.createLinearGradient(0, 780, width, 20);
+                gradient.addColorStop(0, yellow);
+                gradient.addColorStop(1, green);
+
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = "#003300";
+                ctx.stroke();
+              }
+
+              function clearCanvas(){
+                var canvas = document.getElementById("canvas");
+                var ctx = canvas.getContext("2d");
+                ctx.clearRect (0, 0, 800, 800);
+              }
+          
           $("body").on("keydown", function(key){
             switch(key.keyCode){
               case 37:
