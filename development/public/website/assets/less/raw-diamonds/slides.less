@@ -11,14 +11,13 @@
 #wrap {
   width: 50%;
   max-height: 100%;
-  //margin-top: 200px;
   margin: 0 auto;
 }
 
 .frame {
   position: relative;
-  // border: 1px solid red;
-  background: url("../images/wall.jpg");
+  background: url("../images/wall.jpg") no-repeat;
+  background-size: cover;
   width: 100%;
   padding-bottom: 100%;
   overflow: hidden;
@@ -29,6 +28,9 @@
   height: 80%;
   position: absolute;
   transition: all 0.5s ease;
+  background-repeat: no-repeat;
+  background-position:  center center;
+  background-size: contain;
 }
 
 .topmost {
@@ -74,8 +76,3 @@
 .rightest, .leftest, .bottommost, .topmost {
   display: none;
 }
-
-img {
-  width: 100%
-}
-
