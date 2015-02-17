@@ -77,7 +77,7 @@
               var translationX = translation[0];
               var translationY = translation[1];
               
-              var translationThreshold = 100;
+              var translationThreshold = 200;
 
                 var horizontal = Math.abs(translationX) > Math.abs(translationY) ? true : false;
 
@@ -87,19 +87,15 @@
 
                         if(translationX < -translationThreshold) {
                           animate("left");
-                        }
-                        if(translationX > translationThreshold)  {
+                        } else if (translationX > translationThreshold)  {
                           animate("right");
                         }
-                       } else {
+                      } else {
 
                         if(translationY < -translationThreshold) {
                           animate("down");
-                        }
-
-                        if(translationY > translationThreshold ) {
+                        } else if (translationY > translationThreshold ) {
                           animate("up");
-
                         }
                       }
                       
@@ -128,7 +124,7 @@
 
                 window.setTimeout(function(){
                   animating = false;
-                }, 1000);
+                }, 500);
 
               }
 
