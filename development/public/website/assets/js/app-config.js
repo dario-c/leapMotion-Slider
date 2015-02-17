@@ -1,4 +1,3 @@
-// Create PROVIZ namespace
 window.Caviar = window.Caviar || {};
 
 (function(ns)
