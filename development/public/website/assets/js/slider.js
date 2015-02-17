@@ -139,6 +139,7 @@
 
               }
 
+
               $("body").on("keydown", function(key){
                 switch(key.keyCode){
                   case 37:
@@ -152,6 +153,9 @@
                     break;
                   case 40:
                     animate("down");
+                    break;
+                  case 90:
+                    $(".frame").toggleClass("zoomed-out");
                     break;
                 }
               });

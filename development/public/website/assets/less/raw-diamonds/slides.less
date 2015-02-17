@@ -4,8 +4,12 @@
 // ---------------------------------------------------------------------- */
 @red: red;
 
-@position-body: 80% ;
-@margin: 10%;
+@position-body-sma: 15% ;
+@margin-sma: 4%;
+@body-and-margin-sma: @position-body-sma + @margin-sma;
+
+@position-body: 80% ; // 80
+@margin: 10%;          // 10
 @reduce-margin: 0;
 
 #wrap {
@@ -23,15 +27,16 @@
   overflow: hidden;
 }
 
-#wrap > div > div { 
-  width: 80%;
-  height: 80%;
+.frame > div { 
+  width: @position-body;
+  height: @position-body;
   position: absolute;
   transition: all 0.5s ease;
   background-repeat: no-repeat;
   background-position:  center center;
   background-size: contain;
 }
+
 
 .topmost {
   top: -(@position-body * 2 + @margin - @reduce-margin * 2) 
@@ -74,5 +79,31 @@
 }
 
 .rightest, .leftest, .bottommost, .topmost {
-  display: none;
+  visibility: hidden;
 }
+
+
+
+.zoomed-out{
+  div {
+    width: @position-body-sma;
+    height: @position-body-sma;
+  }
+
+  .topmost {     top: @margin-sma;  }
+  .top {         top: @margin-sma +   @body-and-margin-sma}
+  .center {      top: @margin-sma +  (@body-and-margin-sma * 2)}
+  .bottom {      top: @margin-sma +  (@body-and-margin-sma * 3)}
+  .bottommost {  top: @margin-sma +  (@body-and-margin-sma * 4)}
+  
+  .leftest {   left: @margin-sma;  }
+  .left {      left: @margin-sma +   @body-and-margin-sma}
+  .middle {    left: @margin-sma +  (@body-and-margin-sma * 2)}
+  .right {     left: @margin-sma +  (@body-and-margin-sma * 3)}
+  .rightest {  left: @margin-sma +  (@body-and-margin-sma * 4)}
+
+  .rightest, .leftest, .bottommost, .topmost {
+    visibility: visible;
+  }
+}
+
