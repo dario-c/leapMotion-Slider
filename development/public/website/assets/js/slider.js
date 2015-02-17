@@ -12,7 +12,7 @@
     ns.Slider = function ()
     {
 
-      var imagesRoot = "url(website/assets/images/";
+      var imagesRoot = "website/assets/images/";
 
       var posibleXPositions = ["rightest", "right", "middle", "left", "leftest" ];
       var posibleYPositions = ["topmost", "top", "center", "bottom", "bottommost"];
@@ -33,7 +33,7 @@
       
       var rows = [row1, row2, row3, row4, row5];
 
-       function slide(columnOrRow, posiblePositions, positive) {
+      var slide = function(columnOrRow, posiblePositions, positive) {
          // Loop through all Columns or Rows
           for(var x = 0; x < columnOrRow.length; x++) {
             // Update elements attributes
@@ -43,9 +43,9 @@
               .addClass(columnOrRow[x].posClass)
               .removeClass(columnOrRow[x].oldClass);
           }
-       }
+       };
 
-      function updateElement(columnOrRow, posiblePositions, positive){
+      var updateElement = function(columnOrRow, posiblePositions, positive){
 
           var oldPosition = posiblePositions.indexOf(columnOrRow.posClass);
           var newPosition = positive ? oldPosition - 1 : oldPosition + 1;
@@ -63,99 +63,100 @@
           } else {
               columnOrRow.posClass = posiblePositions[newPosition];
           }
-      }
+      };
 
-      function appendImages(){
+      var appendImages = function(){
         for(var x = 0; x < rows.length; x++){
             for(var y = 0; y < columns.length; y++ ){
-            $("." + rows[x].name + "." + columns[y].name).css({ "background-image": imagesRoot + rows[x].artist + "-0" + (y+2) + rows[x].extension + ")"});
+            $("." + rows[x].name + "." + columns[y].name).css({ "background-image": "url(" + imagesRoot + rows[x].artist + "-0" + (y+2) + rows[x].extension + ")"});
             }
         }
-      }
+      };
 
-        var init = function (){
-          appendImages();
+      var init = function (){
 
-          var animating = false;
+        appendImages();
 
-          var controller = new Leap.Controller();
+        var animating = false;
 
-          controller.on("frame", function(frame){
-            if(frame.hands.length > 0){
-              var hand = frame.hands[0];
-              
-              var translation = hand.translation(controller.frame(10));
-              var translationX = translation[0];
-              var translationY = translation[1];
-              
-              var translationThreshold = 175;
+        var controller = new Leap.Controller();
 
-                var horizontal = Math.abs(translationX) > Math.abs(translationY) ? true : false;
+        controller.on("frame", function(frame){
+          if(frame.hands.length > 0){
+            var hand = frame.hands[0];
+            
+            var translation = hand.translation(controller.frame(10));
+            var translationX = translation[0];
+            var translationY = translation[1];
+            
+            var translationThreshold = 175;
 
-                    if(!animating){
+              var horizontal = Math.abs(translationX) > Math.abs(translationY) ? true : false;
 
-                      if(horizontal) {
+                  if(!animating){
 
-                        if(translationX < -translationThreshold) {
-                          animate("left");
-                        } else if (translationX > translationThreshold)  {
-                          animate("right");
-                        }
-                      } else {
+                    if(horizontal) {
 
-                        if(translationY < -translationThreshold) {
-                          animate("down");
-                        } else if (translationY > translationThreshold ) {
-                          animate("up");
-                        }
+                      if(translationX < -translationThreshold) {
+                        animate("left");
+                      } else if (translationX > translationThreshold)  {
+                        animate("right");
                       }
-                      
+                    } else {
+
+                      if(translationY < -translationThreshold) {
+                        animate("down");
+                      } else if (translationY > translationThreshold ) {
+                        animate("up");
+                      }
                     }
-                }
-              });
-
-              controller.connect();
-
-              function animate(direction) {
-                switch(direction){
-                  case "left":
-                    slide(columns, posibleXPositions, false); // left
-                    break;
-                  case "up":
-                    slide(rows, posibleYPositions, true); // up
-                    break;
-                  case "right":
-                    slide(columns, posibleXPositions, true); // right
-                    break;
-                  case "down":
-                    slide(rows, posibleYPositions, false); // down
-                    break;
-                }
-                animating = true;
-
-                window.setTimeout(function(){
-                  animating = false;
-                }, 500);
-
+                    
+                  }
               }
+            });
 
-              $("body").on("keydown", function(key){
-                switch(key.keyCode){
-                  case 37:
-                    animate("left");
-                    break;
-                  case 38:
-                    animate("up");
-                    break;
-                  case 39:
-                    animate("right");
-                    break;
-                  case 40:
-                    animate("down");
-                    break;
-                }
-              });
-        };
+            controller.connect();
+
+            function animate(direction) {
+              switch(direction){
+                case "left":
+                  slide(columns, posibleXPositions, false); // left
+                  break;
+                case "up":
+                  slide(rows, posibleYPositions, true); // up
+                  break;
+                case "right":
+                  slide(columns, posibleXPositions, true); // right
+                  break;
+                case "down":
+                  slide(rows, posibleYPositions, false); // down
+                  break;
+              }
+              animating = true;
+
+              window.setTimeout(function(){
+                animating = false;
+              }, 500);
+
+            }
+
+            $("body").on("keydown", function(key){
+              switch(key.keyCode){
+                case 37:
+                  animate("left");
+                  break;
+                case 38:
+                  animate("up");
+                  break;
+                case 39:
+                  animate("right");
+                  break;
+                case 40:
+                  animate("down");
+                  break;
+              }
+            });
+      };
 
         init();
     };
