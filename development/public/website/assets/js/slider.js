@@ -154,6 +154,9 @@
                 case 40:
                   animate("down");
                   break;
+                case 90:
+                  $(".frame").toggleClass("zoomed-out");
+                  break;
               }
             });
       };

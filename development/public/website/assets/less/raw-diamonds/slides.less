@@ -4,8 +4,13 @@
 // ---------------------------------------------------------------------- */
 @red: red;
 
-@position-body: 80% ;
+@picture-size-small: 15% ;
+@margin-small: 4%;
+@picture-and-margin-small: @picture-size-small + @margin-small;
+
+@picture-size: 80% ;
 @margin: 10%;
+@picture-and-margin: @picture-size + @margin;
 @reduce-margin: 0;
 
 .wrap {
@@ -23,9 +28,9 @@
   overflow: hidden;
 }
 
-#wrap > div > div { 
-  width: 80%;
-  height: 80%;
+.frame > div { 
+  width: @picture-size;
+  height: @picture-size;
   position: absolute;
   transition: all 0.5s ease;
   background-repeat: no-repeat;
@@ -33,12 +38,13 @@
   background-size: contain;
 }
 
+
 .topmost {
-  top: -(@position-body * 2 + @margin - @reduce-margin * 2) 
+  top: -(@picture-size + @margin + @picture-size)
 } 
 
 .top {
-  top: -@position-body + @reduce-margin;
+  top: -@picture-size;
 }
 
 .center {
@@ -46,19 +52,19 @@
 }
 
 .bottom {
-  top: @margin + @position-body + @margin - @reduce-margin;
+  top: @margin + @picture-and-margin;
 }
 
 .bottommost {
-  top: @margin + @position-body + @margin + @position-body + @margin - @reduce-margin * 2;
+  top: @margin + (@picture-and-margin * 2)
 }
 
 .leftest {
-  left: -(@position-body + @margin + @position-body) + @reduce-margin * 2;
+  left: -(@picture-size + @margin + @picture-size) + @reduce-margin * 2;
 }
 
 .left {
-  left: -@position-body + @reduce-margin
+  left: -@picture-size
 }
 
 .middle {
@@ -66,13 +72,39 @@
 }
 
 .right {
-  left: @margin + @position-body + @margin - @reduce-margin;
+  left: @margin + @picture-and-margin;
 }
 
 .rightest {
-  left: @margin + @position-body + @margin + @position-body + @margin - @reduce-margin * 2;
+  left: @margin + (@picture-and-margin * 2)
 }
 
 .rightest, .leftest, .bottommost, .topmost {
-  display: none;
+  visibility: hidden;
 }
+
+
+
+.zoomed-out{
+  div {
+    width: @picture-size-small;
+    height: @picture-size-small;
+  }
+
+  .topmost {     top: @margin-small;  }
+  .top {         top: @margin-small +   @picture-and-margin-small}
+  .center {      top: @margin-small +  (@picture-and-margin-small * 2)}
+  .bottom {      top: @margin-small +  (@picture-and-margin-small * 3)}
+  .bottommost {  top: @margin-small +  (@picture-and-margin-small * 4)}
+  
+  .leftest {   left: @margin-small;  }
+  .left {      left: @margin-small +   @picture-and-margin-small}
+  .middle {    left: @margin-small +  (@picture-and-margin-small * 2)}
+  .right {     left: @margin-small +  (@picture-and-margin-small * 3)}
+  .rightest {  left: @margin-small +  (@picture-and-margin-small * 4)}
+
+  .rightest, .leftest, .bottommost, .topmost {
+    visibility: visible;
+  }
+}
+
