@@ -2,7 +2,6 @@
 /* @Usage:        Project styles
 * @Description:  Project specific styling 
 // ---------------------------------------------------------------------- */
-@red: red;
 
 @picture-size-small: 15% ;
 @margin-small: 4%;
@@ -11,7 +10,6 @@
 @picture-size: 80% ;
 @margin: 10%;
 @picture-and-margin: @picture-size + @margin;
-@reduce-margin: 0;
 
 .wrap {
   width: 50%;
@@ -38,55 +36,24 @@
   background-size: contain;
 }
 
+.topmost {     top: -(@picture-size + @picture-and-margin)}
+.top {         top: -@picture-size;}
+.center {      top: @margin;}
+.bottom {      top: @margin + @picture-and-margin;}
+.bottommost {  top: @margin + (@picture-and-margin * 2)}
 
-.topmost {
-  top: -(@picture-size + @margin + @picture-size)
-} 
+.leftest {  left: -(@picture-size + @picture-and-margin)}
+.left {     left: -@picture-size}
+.middle {   left: @margin}
+.right {    left: @margin + @picture-and-margin}
+.rightest { left: @margin + (@picture-and-margin * 2)}
 
-.top {
-  top: -@picture-size;
-}
-
-.center {
-  top: @margin;
-}
-
-.bottom {
-  top: @margin + @picture-and-margin;
-}
-
-.bottommost {
-  top: @margin + (@picture-and-margin * 2)
-}
-
-.leftest {
-  left: -(@picture-size + @margin + @picture-size) + @reduce-margin * 2;
-}
-
-.left {
-  left: -@picture-size
-}
-
-.middle {
-  left: @margin;
-}
-
-.right {
-  left: @margin + @picture-and-margin;
-}
-
-.rightest {
-  left: @margin + (@picture-and-margin * 2)
-}
-
-.rightest, .leftest, .bottommost, .topmost {
-  visibility: hidden;
-}
-
-
+.rightest, .leftest, .bottommost, .topmost {  visibility: hidden; }
 
 .zoomed-out{
-  div {
+  
+  
+  > div {
     width: @picture-size-small;
     height: @picture-size-small;
   }
@@ -103,8 +70,6 @@
   .right {     left: @margin-small +  (@picture-and-margin-small * 3)}
   .rightest {  left: @margin-small +  (@picture-and-margin-small * 4)}
 
-  .rightest, .leftest, .bottommost, .topmost {
-    visibility: visible;
-  }
+  .rightest, .leftest, .bottommost, .topmost {  visibility: visible; }
 }
 

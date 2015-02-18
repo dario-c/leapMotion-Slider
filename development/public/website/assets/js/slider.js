@@ -11,6 +11,10 @@
      */
     ns.Slider = function ()
     {
+      var left = "left";
+      var right = "right";
+      var up = "up";
+      var down = "down";
 
       var imagesRoot = "website/assets/images/";
 
@@ -98,16 +102,16 @@
                     if(horizontal) {
 
                       if(translationX < -translationThreshold) {
-                        animate("left");
+                        animate(left);
                       } else if (translationX > translationThreshold)  {
-                        animate("right");
+                        animate(right);
                       }
                     } else {
 
                       if(translationY < -translationThreshold) {
-                        animate("down");
+                        animate(down);
                       } else if (translationY > translationThreshold ) {
-                        animate("up");
+                        animate(up);
                       }
                     }
                     
@@ -119,16 +123,16 @@
 
             function animate(direction) {
               switch(direction){
-                case "left":
+                case left:
                   slide(columns, posibleXPositions, false); // left
                   break;
-                case "up":
+                case up:
                   slide(rows, posibleYPositions, true); // up
                   break;
-                case "right":
+                case right:
                   slide(columns, posibleXPositions, true); // right
                   break;
-                case "down":
+                case down:
                   slide(rows, posibleYPositions, false); // down
                   break;
               }
@@ -140,19 +144,21 @@
 
             }
 
-            $("body").on("keydown", function(key){
+            var $body = $(ns.body);
+
+            $body.on("keydown", function(key){
               switch(key.keyCode){
                 case 37:
-                  animate("left");
+                  animate(left);
                   break;
                 case 38:
-                  animate("up");
+                  animate(up);
                   break;
                 case 39:
-                  animate("right");
+                  animate(right);
                   break;
                 case 40:
-                  animate("down");
+                  animate(down);
                   break;
                 case 90:
                   $(".frame").toggleClass("zoomed-out");
