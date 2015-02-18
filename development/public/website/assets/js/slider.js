@@ -135,6 +135,51 @@
         }
       };
 
+      var selectedRow = "bottommost";
+      var selectedColumn = "right";
+
+      function bringToCenter(rowDistance, columnDistance) {
+          if (rowDistance > 0) {
+              // console.log(rowDistance, "animating");
+              animate(down);
+              rowDistance--;
+              bringToCenter(rowDistance, columnDistance);
+          } else if (rowDistance < 0) {
+              // console.log(rowDistance, "animating");
+              animate(up);
+              rowDistance++;
+              bringToCenter(rowDistance, columnDistance);
+          } else {
+            console.log(columnDistance);
+            if (columnDistance > 0) {
+                // console.log(rowDistance, "animating");
+                animate(left);
+                columnDistance--;
+                bringToCenter(rowDistance, columnDistance);
+            } else if (columnDistance < 0) {
+                // console.log(columnDistance, "animating");
+                animate(right);
+                columnDistance++;
+                bringToCenter(rowDistance, columnDistance);
+            } else {
+                console.log("centered");
+            }
+          }
+      }
+
+      function findRowDistance() {
+          var offset = 2 - posibleYPositions.indexOf(selectedRow);
+          return offset;
+      }
+
+      function findColumnDistance() {
+          var offset = 2 - posibleXPositions.indexOf(selectedColumn);
+          return offset;
+      }
+
+      var rowDistance = findRowDistance();
+      var columnDistance = findColumnDistance();
+
       var init = function (){
         appendImages();
 
@@ -158,6 +203,10 @@
               break;
             case 90:
               $(".frame").toggleClass("zoomed-out");
+              break;
+            case 67:
+              $(".frame").toggleClass("zoomed-out"); 
+              bringToCenter(rowDistance, columnDistance);
               break;
           }
         });
