@@ -17,6 +17,7 @@
       var down = "down";
 
       var imagesRoot = "website/assets/images/";
+      var $frame = $(".frame");
 
       var posibleXPositions = ["rightest", "right", "middle", "left", "leftest" ];
       var posibleYPositions = ["topmost", "top", "center", "bottom", "bottommost"];
@@ -68,15 +69,21 @@
         }
       };
 
-      var appendImages = function(){
+      var appendSlides = function(){
+        var slides = [];
         for(var x = 0; x < rows.length; x++){
           for(var y = 0; y < columns.length; y++ ){
-          $("." + rows[x].name + "." + columns[y].name).css({ "background-image": "url(" + imagesRoot + rows[x].artist + "-0" + (y+2) + rows[x].extension + ")"});
+            var $newElement = $("<div></div>");
+            $newElement.addClass(rows[x].name + " " + columns[y].name + " " + rows[x].posClass + " " +columns[y].posClass);
+            $newElement.css({ "background-image": "url(" + imagesRoot + rows[x].artist + "-0" + (y+2) + rows[x].extension + ")"});
+
+            slides.push($newElement);
           }
         }
+        $frame.append(slides);
       };
 
-      function animate(direction) {
+      var animate = function(direction) {
         switch(direction){
           case left:
             slide(columns, posibleXPositions, false); // left
@@ -92,12 +99,7 @@
             break;
         }
         animating = true;
-
-        window.setTimeout(function(){
-          animating = false;
-        }, 500);
-
-      }
+      };
 
       var animating = false;
       var controller = new Leap.Controller();
@@ -176,38 +178,48 @@
       var rowOffset = findRowOffset();
       var columnOffset = findColumnOffset();
 
+      var endAnimating = function(){
+        animating = false;
+      };
+
+
       var init = function (){
-        appendImages();
+        appendSlides();
+        console.log("go");
 
         controller.on("frame", processFrame);
         controller.connect();
 
-        // Just for Debugging 
-        $(ns.body).on("keydown", function(key){
-          switch(key.keyCode){
-            case 37:
-              animate(left);
-              break;
-            case 38:
-              animate(up);
-              break;
-            case 39:
-              animate(right);
-              break;
-            case 40:
-              animate(down);
-              break;
-            case 90:
-              $(".frame").toggleClass("zoomed-out");
-              break;
-            case 67:
-              $(".frame").toggleClass("zoomed-out");
-              bringToCenter(rowOffset, columnOffset);
-              break;
-          }
-        });
-      };
+        var oneSlide = $frame.find("div").first();
+        oneSlide.on("transitionend", endAnimating);
 
+        // Just for Debugging 
+        if(ns.DEBUG){
+          $(ns.body).on("keydown", function(key){
+            switch(key.keyCode){
+              case 37:
+                animate(left);
+                break;
+              case 38:
+                animate(up);
+                break;
+              case 39:
+                animate(right);
+                break;
+              case 40:
+                animate(down);
+                break;
+              case 90:
+                $(".frame").toggleClass("zoomed-out");
+                break;
+              case 67:
+                $(".frame").toggleClass("zoomed-out");
+                bringToCenter(rowOffset, columnOffset);
+                break;
+            }
+          });
+        }
+      };
       init();
     };
 
