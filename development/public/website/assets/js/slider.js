@@ -143,7 +143,6 @@
 
       var init = function (){
         appendSlides();
-        console.log("go");
 
         controller.on("frame", processFrame);
         controller.connect();
