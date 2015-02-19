@@ -18,6 +18,8 @@
 
       var imagesRoot = "website/assets/images/";
 
+      var oneSlide = $(".frame").find("div").first();
+
       var posibleXPositions = ["rightest", "right", "middle", "left", "leftest" ];
       var posibleYPositions = ["topmost", "top", "center", "bottom", "bottommost"];
 
@@ -76,7 +78,7 @@
         }
       };
 
-      function animate(direction) {
+      var animate = function(direction) {
         switch(direction){
           case left:
             slide(columns, posibleXPositions, false); // left
@@ -92,12 +94,7 @@
             break;
         }
         animating = true;
-
-        window.setTimeout(function(){
-          animating = false;
-        }, 500);
-
-      }
+      };
 
       var animating = false;
       var controller = new Leap.Controller();
@@ -135,32 +132,40 @@
         }
       };
 
+      var endAnimating = function(){
+        animating = false;
+      };
+
       var init = function (){
         appendImages();
 
         controller.on("frame", processFrame);
         controller.connect();
 
+        oneSlide.on("transitionend", endAnimating);
+
         // Just for Debugging 
-        $(ns.body).on("keydown", function(key){
-          switch(key.keyCode){
-            case 37:
-              animate(left);
-              break;
-            case 38:
-              animate(up);
-              break;
-            case 39:
-              animate(right);
-              break;
-            case 40:
-              animate(down);
-              break;
-            case 90:
-              $(".frame").toggleClass("zoomed-out");
-              break;
-          }
-        });
+        if(ns.DEBUG){
+          $(ns.body).on("keydown", function(key){
+            switch(key.keyCode){
+              case 37:
+                animate(left);
+                break;
+              case 38:
+                animate(up);
+                break;
+              case 39:
+                animate(right);
+                break;
+              case 40:
+                animate(down);
+                break;
+              case 90:
+                $(".frame").toggleClass("zoomed-out");
+                break;
+            }
+          });
+        }
       };
 
       init();

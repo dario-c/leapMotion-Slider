@@ -5,7 +5,7 @@ window.Caviar = window.Caviar || {};
     "use strict";
 
     // Set global flags
-    ns.DEBUG = false;
+    ns.DEBUG = true;
     ns.body = document.body;
     // Events that can get dispatched
     ns.eventNames = {
