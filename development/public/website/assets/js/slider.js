@@ -43,7 +43,7 @@
         for(var x = 0; x < columnOrRow.length; x++) {
           // Update elements attributes
           updateElement(columnOrRow[x], posiblePositions, positive);
-          // Apply changes to posClasses
+          // Apply changes to positioning Classes
           $("."+columnOrRow[x].name)
             .addClass(columnOrRow[x].posClass)
             .removeClass(columnOrRow[x].oldClass);
@@ -165,18 +165,18 @@
           }
       }
 
-      function findRowOffset() {
+      function findRowClassOffset() {
           var offset = 2 - posibleYPositions.indexOf(selectedRow);
           return offset;
       }
 
-      function findColumnOffset() {
+      function findColumnClassOffset() {
           var offset = 2 - posibleXPositions.indexOf(selectedColumn);
           return offset;
       }
 
-      var rowOffset = findRowOffset();
-      var columnOffset = findColumnOffset();
+      var rowClassOffset = findRowClassOffset();
+      var columnClassOffset = findColumnClassOffset();
 
       var endAnimating = function(){
         animating = false;
@@ -185,7 +185,6 @@
 
       var init = function (){
         appendSlides();
-        console.log("go");
 
         controller.on("frame", processFrame);
         controller.connect();
@@ -214,7 +213,7 @@
                 break;
               case 67:
                 $(".frame").toggleClass("zoomed-out");
-                bringToCenter(rowOffset, columnOffset);
+                bringToCenter(rowClassOffset, columnClassOffset);
                 break;
             }
           });
