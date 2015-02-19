@@ -17,8 +17,7 @@
       var down = "down";
 
       var imagesRoot = "website/assets/images/";
-
-      var oneSlide = $(".frame").find("div").first();
+      var $frame = $(".frame");
 
       var posibleXPositions = ["rightest", "right", "middle", "left", "leftest" ];
       var posibleYPositions = ["topmost", "top", "center", "bottom", "bottommost"];
@@ -70,12 +69,18 @@
         }
       };
 
-      var appendImages = function(){
+      var appendSlides = function(){
+        var slides = [];
         for(var x = 0; x < rows.length; x++){
           for(var y = 0; y < columns.length; y++ ){
-          $("." + rows[x].name + "." + columns[y].name).css({ "background-image": "url(" + imagesRoot + rows[x].artist + "-0" + (y+2) + rows[x].extension + ")"});
+            var $newElement = $("<div></div>");
+            $newElement.addClass(rows[x].name + " " + columns[y].name + " " + rows[x].posClass + " " +columns[y].posClass);
+            $newElement.css({ "background-image": "url(" + imagesRoot + rows[x].artist + "-0" + (y+2) + rows[x].extension + ")"});
+
+            slides.push($newElement);
           }
         }
+        $frame.append(slides);
       };
 
       var animate = function(direction) {
@@ -137,11 +142,12 @@
       };
 
       var init = function (){
-        appendImages();
+        appendSlides();
 
         controller.on("frame", processFrame);
         controller.connect();
 
+        var oneSlide = $frame.find("div").first();
         oneSlide.on("transitionend", endAnimating);
 
         // Just for Debugging 
