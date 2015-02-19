@@ -2,17 +2,22 @@
 /* @Usage:        Project styles
 * @Description:  Project specific styling 
 // ---------------------------------------------------------------------- */
-@red: red;
 
-@position-body-sma: 15% ;
-@margin-sma: 4%;
-@body-and-margin-sma: @position-body-sma + @margin-sma;
 
-@position-body: 80% ; // 80
-@margin: 10%;          // 10
-@reduce-margin: 0;
+@picture-size-small: 15% ;
+@margin-small: 4%;
+@picture-and-margin-small: @picture-size-small + @margin-small;
 
-#wrap {
+@picture-size: 80% ;
+@margin: 10%;
+@picture-and-margin: @picture-size + @margin;
+
+body {
+  background: url("../images/wall.jpg") no-repeat;
+  background-size: cover;
+}
+
+.wrap {
   width: 50%;
   max-height: 100%;
   margin: 0 auto;
@@ -20,16 +25,16 @@
 
 .frame {
   position: relative;
-  background: url("../images/wall.jpg") no-repeat;
-  background-size: cover;
+  // background: url("../images/wall.jpg") no-repeat;
+  // background-size: cover;
   width: 100%;
   padding-bottom: 100%;
   overflow: hidden;
 }
 
 .frame > div { 
-  width: @position-body;
-  height: @position-body;
+  width: @picture-size;
+  height: @picture-size;
   position: absolute;
   transition: all 0.5s ease;
   background-repeat: no-repeat;
@@ -37,73 +42,39 @@
   background-size: contain;
 }
 
+.topmost {     top: -(@picture-size + @picture-and-margin)}
+.top {         top: -@picture-size;}
+.center {      top: @margin;}
+.bottom {      top: @margin + @picture-and-margin;}
+.bottommost {  top: @margin + (@picture-and-margin * 2)}
 
-.topmost {
-  top: -(@position-body * 2 + @margin - @reduce-margin * 2) 
-} 
+.leftest {  left: -(@picture-size + @picture-and-margin)}
+.left {     left: -@picture-size}
+.middle {   left: @margin}
+.right {    left: @margin + @picture-and-margin}
+.rightest { left: @margin + (@picture-and-margin * 2)}
 
-.top {
-  top: -@position-body + @reduce-margin;
-}
-
-.center {
-  top: @margin;
-}
-
-.bottom {
-  top: @margin + @position-body + @margin - @reduce-margin;
-}
-
-.bottommost {
-  top: @margin + @position-body + @margin + @position-body + @margin - @reduce-margin * 2;
-}
-
-.leftest {
-  left: -(@position-body + @margin + @position-body) + @reduce-margin * 2;
-}
-
-.left {
-  left: -@position-body + @reduce-margin
-}
-
-.middle {
-  left: @margin;
-}
-
-.right {
-  left: @margin + @position-body + @margin - @reduce-margin;
-}
-
-.rightest {
-  left: @margin + @position-body + @margin + @position-body + @margin - @reduce-margin * 2;
-}
-
-.rightest, .leftest, .bottommost, .topmost {
-  visibility: hidden;
-}
-
-
+.rightest, .leftest, .bottommost, .topmost {  visibility: hidden; }
 
 .zoomed-out{
-  div {
-    width: @position-body-sma;
-    height: @position-body-sma;
-  }
-
-  .topmost {     top: @margin-sma;  }
-  .top {         top: @margin-sma +   @body-and-margin-sma}
-  .center {      top: @margin-sma +  (@body-and-margin-sma * 2)}
-  .bottom {      top: @margin-sma +  (@body-and-margin-sma * 3)}
-  .bottommost {  top: @margin-sma +  (@body-and-margin-sma * 4)}
   
-  .leftest {   left: @margin-sma;  }
-  .left {      left: @margin-sma +   @body-and-margin-sma}
-  .middle {    left: @margin-sma +  (@body-and-margin-sma * 2)}
-  .right {     left: @margin-sma +  (@body-and-margin-sma * 3)}
-  .rightest {  left: @margin-sma +  (@body-and-margin-sma * 4)}
-
-  .rightest, .leftest, .bottommost, .topmost {
-    visibility: visible;
+  
+  > div {
+    width: @picture-size-small;
+    height: @picture-size-small;
   }
-}
 
+  .topmost {     top: @margin-small;  }
+  .top {         top: @margin-small +   @picture-and-margin-small}
+  .center {      top: @margin-small +  (@picture-and-margin-small * 2)}
+  .bottom {      top: @margin-small +  (@picture-and-margin-small * 3)}
+  .bottommost {  top: @margin-small +  (@picture-and-margin-small * 4)}
+  
+  .leftest {   left: @margin-small;  }
+  .left {      left: @margin-small +   @picture-and-margin-small}
+  .middle {    left: @margin-small +  (@picture-and-margin-small * 2)}
+  .right {     left: @margin-small +  (@picture-and-margin-small * 3)}
+  .rightest {  left: @margin-small +  (@picture-and-margin-small * 4)}
+
+  .rightest, .leftest, .bottommost, .topmost {  visibility: visible; }
+}
