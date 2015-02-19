@@ -136,28 +136,24 @@
       };
 
       var selectedRow = "bottommost";
-      var selectedColumn = "right";
+      var selectedColumn = "rightest";
 
       function bringToCenter(rowDistance, columnDistance) {
           if (rowDistance > 0) {
-              // console.log(rowDistance, "animating");
               animate(down);
               rowDistance--;
               bringToCenter(rowDistance, columnDistance);
           } else if (rowDistance < 0) {
-              // console.log(rowDistance, "animating");
               animate(up);
               rowDistance++;
               bringToCenter(rowDistance, columnDistance);
           } else {
             console.log(columnDistance);
             if (columnDistance > 0) {
-                // console.log(rowDistance, "animating");
                 animate(left);
                 columnDistance--;
                 bringToCenter(rowDistance, columnDistance);
             } else if (columnDistance < 0) {
-                // console.log(columnDistance, "animating");
                 animate(right);
                 columnDistance++;
                 bringToCenter(rowDistance, columnDistance);
@@ -167,18 +163,18 @@
           }
       }
 
-      function findRowDistance() {
+      function findRowOffset() {
           var offset = 2 - posibleYPositions.indexOf(selectedRow);
           return offset;
       }
 
-      function findColumnDistance() {
+      function findColumnOffset() {
           var offset = 2 - posibleXPositions.indexOf(selectedColumn);
           return offset;
       }
 
-      var rowDistance = findRowDistance();
-      var columnDistance = findColumnDistance();
+      var rowOffset = findRowOffset();
+      var columnOffset = findColumnOffset();
 
       var init = function (){
         appendImages();
@@ -205,8 +201,8 @@
               $(".frame").toggleClass("zoomed-out");
               break;
             case 67:
-              $(".frame").toggleClass("zoomed-out"); 
-              bringToCenter(rowDistance, columnDistance);
+              $(".frame").toggleClass("zoomed-out");
+              bringToCenter(rowOffset, columnOffset);
               break;
           }
         });

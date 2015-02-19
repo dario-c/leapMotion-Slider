@@ -31,11 +31,13 @@ body {
   overflow: hidden;
 }
 
+
+
 .frame > div { 
   width: @picture-size;
   height: @picture-size;
   position: absolute;
-  transition: all 0.5s ease;
+  transition: top 0.5s ease, left 0.5s ease, outline 0s;
   background-repeat: no-repeat;
   background-position:  center center;
   background-size: contain;
@@ -61,6 +63,10 @@ body {
   > div {
     width: @picture-size-small;
     height: @picture-size-small;
+  }
+
+  > div:hover {
+    outline: 4px solid #BADA55;
   }
 
   .topmost {     top: @margin-small;  }
