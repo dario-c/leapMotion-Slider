@@ -24,8 +24,6 @@ body {
 
 .frame {
   position: relative;
-  // background: url("../images/wall.jpg") no-repeat;
-  // background-size: cover;
   width: 100%;
   padding-bottom: 100%;
   overflow: hidden;
@@ -36,45 +34,41 @@ body {
   height: @picture-size;
   position: absolute;
   transition: all 0.5s ease;
-  background-repeat: no-repeat;
-  background-position:  center center;
+  background: center center no-repeat;
   background-size: contain;
 }
 
-.topmost {     top: -(@picture-size + @picture-and-margin)}
-.top {         top: -@picture-size;}
-.center {      top: @margin;}
-.bottom {      top: @margin + @picture-and-margin;}
+.topmost {     top: -(@picture-size + @picture-and-margin) }
+.top {         top: -@picture-size }
+.center {      top: @margin }
+.bottom {      top: @margin + @picture-and-margin }
 .bottommost {  top: @margin + (@picture-and-margin * 2)}
 
-.leftest {  left: -(@picture-size + @picture-and-margin)}
-.left {     left: -@picture-size}
-.middle {   left: @margin}
-.right {    left: @margin + @picture-and-margin}
-.rightest { left: @margin + (@picture-and-margin * 2)}
+.leftest {  left: -(@picture-size + @picture-and-margin) }
+.left {     left: -@picture-size }
+.middle {   left: @margin }
+.right {    left: @margin + @picture-and-margin }
+.rightest { left: @margin + (@picture-and-margin * 2) }
 
-.rightest, .leftest, .bottommost, .topmost {  visibility: hidden; }
+.rightest, .leftest, .bottommost, .topmost {  visibility: hidden }
 
 .zoomed-out{
-  
-  
   > div {
     width: @picture-size-small;
     height: @picture-size-small;
   }
 
-  .topmost {     top: @margin-small;  }
-  .top {         top: @margin-small +   @picture-and-margin-small}
-  .center {      top: @margin-small +  (@picture-and-margin-small * 2)}
-  .bottom {      top: @margin-small +  (@picture-and-margin-small * 3)}
-  .bottommost {  top: @margin-small +  (@picture-and-margin-small * 4)}
+  .topmost {     top: @margin-small }
+  .top {         top: @margin-small +   @picture-and-margin-small }
+  .center {      top: @margin-small +  (@picture-and-margin-small * 2) }
+  .bottom {      top: @margin-small +  (@picture-and-margin-small * 3) }
+  .bottommost {  top: @margin-small +  (@picture-and-margin-small * 4) }
   
-  .leftest {   left: @margin-small;  }
-  .left {      left: @margin-small +   @picture-and-margin-small}
-  .middle {    left: @margin-small +  (@picture-and-margin-small * 2)}
-  .right {     left: @margin-small +  (@picture-and-margin-small * 3)}
-  .rightest {  left: @margin-small +  (@picture-and-margin-small * 4)}
+  .leftest {   left: @margin-small }
+  .left {      left: @margin-small +   @picture-and-margin-small }
+  .middle {    left: @margin-small +  (@picture-and-margin-small * 2) }
+  .right {     left: @margin-small +  (@picture-and-margin-small * 3) }
+  .rightest {  left: @margin-small +  (@picture-and-margin-small * 4) }
 
-  .rightest, .leftest, .bottommost, .topmost {  visibility: visible; }
+  .rightest, .leftest, .bottommost, .topmost {  visibility: visible }
 }
-
