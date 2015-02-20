@@ -107,7 +107,15 @@
       var processFrame = function(frame){
         if(frame.hands.length > 0){
           var hand = frame.hands[0];
-          
+
+          // Check every 3 frames
+          if(frame.id % 3 === 0){
+            console.log("part frame");
+            // findFingerPosition(frame, frame.pointables[0]);
+            findClosestSlide(frame);
+          }
+
+
           var translation = hand.translation(controller.frame(10));
           var translationX = translation[0];
           var translationY = translation[1];
@@ -150,7 +158,7 @@
               rowDistance++;
               bringToCenter(rowDistance, columnDistance);
           } else {
-            console.log(columnDistance);
+            // console.log(columnDistance);
             if (columnDistance > 0) {
                 animate(left);
                 columnDistance--;
@@ -163,6 +171,54 @@
                 console.log("centered");
             }
           }
+      }
+
+      var $wrap = $("#wrap")[0];
+      var wrapAttr = $wrap.getBoundingClientRect();
+
+
+
+      function findFingerPosition(frame, pointable){
+
+      var interactionBox = frame.interactionBox;
+      var normalizedPosition = interactionBox.normalizePoint(pointable.tipPosition, true);
+        // WRAP 
+      var wrapXAxis = Math.round((wrapAttr.width + wrapAttr.left) * normalizedPosition[0]);
+      var wrapYAxis = Math.round((wrapAttr.height + wrapAttr.top) * (1 - normalizedPosition[1]));
+
+
+
+        var elem = document.elementFromPoint(wrapXAxis, wrapYAxis);
+
+        if($(elem).parent().hasClass("frame")){
+          $frame.find("div").removeClass("selected");
+          $(elem).addClass("selected");
+        }
+
+      }
+
+      function findClosestSlide(frame){
+        var interactionBox = frame.interactionBox;
+        var normalizedPosition = interactionBox.normalizePoint(frame.pointables[0].tipPosition, true);
+
+        var wrapXAxis = Math.round((wrapAttr.width + wrapAttr.left) * normalizedPosition[0]);
+        var wrapYAxis = Math.round((wrapAttr.height + wrapAttr.top) * (1 - normalizedPosition[1]));
+
+        var vectors = [];
+        $frame.find("div").each(function(){
+          vectors.push(findElementsCenterPosition(this));
+        });
+
+        for(var x = 0 ; x < vectors.length; x++){
+            console.log(Math.round(Math.abs(vectors[x][0])), Math.round(Math.abs(vectors[x][1])));
+        }
+      }
+
+
+      function findElementsCenterPosition($element){
+        var elementAttr = $element.getBoundingClientRect();
+
+        return [elementAttr.left + (elementAttr.width / 2) + wrapAttr.left, elementAttr.top + (elementAttr.height / 2) + wrapAttr.top];
       }
 
       function findRowClassOffset() {
@@ -186,11 +242,23 @@
       var init = function (){
         appendSlides();
 
-        controller.on("frame", processFrame);
+        controller.on("frame", processFrame)
+          .use("screenPosition", { scale:  1 });
+
         controller.connect();
 
         var oneSlide = $frame.find("div").first();
         oneSlide.on("transitionend", endAnimating);
+
+        $(document).ready(function(){        
+            $(document.body).on('mouseover', function(e){
+                var elem = document.elementFromPoint(e.pageX, e.pageY);
+                
+                // console.log('you selected element id: ' + elem.className);
+                $frame.find("div").removeClass("selected");
+                $(elem).addClass("selected");
+            });
+        });
 
         // Just for Debugging 
         if(ns.DEBUG){
