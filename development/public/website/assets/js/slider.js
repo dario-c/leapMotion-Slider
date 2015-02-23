@@ -11,6 +11,8 @@
      */
     ns.Slider = function ()
     {
+      var translationThreshold = 150;
+
       var left = "left";
       var right = "right";
       var up = "up";
@@ -18,9 +20,12 @@
 
       var imagesRoot = "website/assets/images/";
       var $frame = $(".frame");
+      var $slideDivs;
+      var zoomedOut = false;
 
       var posibleXPositions = ["rightest", "right", "middle", "left", "leftest" ];
       var posibleYPositions = ["topmost", "top", "center", "bottom", "bottommost"];
+      var posibleXPositionsReversed = posibleXPositions.reverse();
 
       var col1 = {name: "col-1", posClass: "leftest"};
       var col2 = {name: "col-2", posClass: "left"};
@@ -38,6 +43,27 @@
       
       var rows = [row1, row2, row3, row4, row5];
 
+
+      var appendSlides = function(){
+        var slides = [];
+        for(var x = 0; x < rows.length; x++){
+          for(var y = 0; y < columns.length; y++ ){
+            var $newElement = $("<div></div>");
+            $newElement.addClass(rows[x].name + " " + columns[y].name + " " + rows[x].posClass + " " +columns[y].posClass);
+            $newElement.css({ "background-image": "url(" + imagesRoot + rows[x].artist + "-0" + (y+2) + rows[x].extension + ")"});
+
+            slides.push($newElement);
+          }
+        }
+        $frame.append(slides);
+        $slideDivs = $frame.find("div");
+      };
+
+
+      var animating = false;
+      var controller = new Leap.Controller();
+
+
       var slide = function(columnOrRow, posiblePositions, positive) {
          // Loop through all Columns or Rows
         for(var x = 0; x < columnOrRow.length; x++) {
@@ -49,6 +75,7 @@
             .removeClass(columnOrRow[x].oldClass);
         }
       };
+
 
       var updateElement = function(columnOrRow, posiblePositions, positive){
         var oldPosition = posiblePositions.indexOf(columnOrRow.posClass);
@@ -69,19 +96,6 @@
         }
       };
 
-      var appendSlides = function(){
-        var slides = [];
-        for(var x = 0; x < rows.length; x++){
-          for(var y = 0; y < columns.length; y++ ){
-            var $newElement = $("<div></div>");
-            $newElement.addClass(rows[x].name + " " + columns[y].name + " " + rows[x].posClass + " " +columns[y].posClass);
-            $newElement.css({ "background-image": "url(" + imagesRoot + rows[x].artist + "-0" + (y+2) + rows[x].extension + ")"});
-
-            slides.push($newElement);
-          }
-        }
-        $frame.append(slides);
-      };
 
       var animate = function(direction) {
         switch(direction){
@@ -101,54 +115,120 @@
         animating = true;
       };
 
-      var animating = false;
-      var controller = new Leap.Controller();
 
       var processFrame = function(frame){
         if(frame.hands.length > 0){
-          var hand = frame.hands[0];
+          var process = zoomedOut ? processFrameZoomedOut : processFrameZoomedIn;
+          process(frame);
+        }
+      };
 
-          // Check every 3 frames
+
+      var processFrameZoomedOut = function(frame){
+         // Check every 3 frames
           if(frame.id % 3 === 0){
-            console.log("part frame");
-            // findFingerPosition(frame, frame.pointables[0]);
-            findClosestSlide(frame);
+            selectSlide(frame);
           }
+      };
 
 
-          var translation = hand.translation(controller.frame(10));
-          var translationX = translation[0];
-          var translationY = translation[1];
-          
-          var translationThreshold = 175;
+      var processFrameZoomedIn = function(frame){
+        var hand = frame.hands[0];
 
-          var horizontal = Math.abs(translationX) > Math.abs(translationY) ? true : false;
+        var translation = hand.translation(controller.frame(10));
+        var translationX = translation[0];
+        var translationY = translation[1];
 
-          if(!animating){
+        var horizontal = Math.abs(translationX) > Math.abs(translationY) ? true : false;
 
-            if(horizontal) {
+        if(!animating){
 
-              if(translationX < -translationThreshold) {
-                animate(left);
-              } else if (translationX > translationThreshold)  {
-                animate(right);
-              }
-            } else {
+          if(horizontal) {
 
-              if(translationY < -translationThreshold) {
-                animate(down);
-              } else if (translationY > translationThreshold ) {
-                animate(up);
-              }
+            if(translationX < -translationThreshold) {
+              animate(left);
+            } else if (translationX > translationThreshold)  {
+              animate(right);
+            }
+          } else {
+
+            if(translationY < -translationThreshold) {
+              animate(down);
+            } else if (translationY > translationThreshold ) {
+              animate(up);
             }
           }
         }
       };
 
-      var selectedRow = "bottommost";
-      var selectedColumn = "rightest";
+      var selectedColumnClass;
+      var selectedRowClass;
 
-      function bringToCenter(rowDistance, columnDistance) {
+
+      var selectSlide = function(frame){
+        var interactionBox = frame.interactionBox;
+        var normalizedPosition = interactionBox.normalizePoint(frame.pointables[0].tipPosition, true);
+
+        var wrapXAxis = Math.round((wrapAttr.width) * normalizedPosition[0]); // Number between 0 and the wrap-width where the finger is poiting in the X axis
+        var wrapYAxis = Math.round((wrapAttr.height) * (1 - normalizedPosition[1])); //  Number bzetween 0 and the wrap-height
+
+        var columnDistanceOffset = [];
+        var rowDistanceOffset = [];
+
+        for(var x = 0; x < columnsCenters.length; x++){
+          columnDistanceOffset.push(Math.abs(wrapXAxis - columnsCenters[x]));
+          rowDistanceOffset.push(Math.abs(wrapYAxis - rowsCenters[x]));
+        }
+
+        var selectColumnIndex =  columnDistanceOffset.indexOf(Math.min.apply(null, columnDistanceOffset));
+        var selectRowIndex = rowDistanceOffset.indexOf(Math.min.apply(null, rowDistanceOffset));
+
+        selectedColumnClass = posibleXPositionsReversed[selectColumnIndex];
+        selectedRowClass = posibleYPositions[selectRowIndex];
+
+        $slideDivs.removeClass("selected");
+        $("." + selectedColumnClass + "." + selectedRowClass).addClass("selected");
+      };
+
+      var centerPositionsFound = false;
+
+
+      var findCenterPositionsOfAllSlides = function(){
+          if(!centerPositionsFound){
+          console.log("here");
+          centerPositionsFound = true;
+          columnsCenters = [];
+          rowsCenters = [];
+
+          $slideDivs.each(function(i){
+            if(i < columns.length){
+              columnsCenters.push(findElementsCenterPosition(this)[0]);
+            }
+            if(i % rows.length === 0){
+              rowsCenters.push(findElementsCenterPosition(this)[1]);
+            }
+          });
+
+          columnsCenters.sort(sortNumber);
+          rowsCenters.sort(sortNumber);
+        }
+      };
+
+      var findElementsCenterPosition = function($element){
+        var elementAttr = $element.getBoundingClientRect();
+        return [Math.round(elementAttr.left + (elementAttr.width / 2) - wrapAttr.left), Math.round(elementAttr.top + (elementAttr.height / 2) - wrapAttr.top)];
+      };
+
+      var sortNumber = function(a,b) {
+          return a - b;
+      };
+
+
+
+      var selectedRow;
+      var selectedColumn;
+
+      var bringToCenter = function (rowDistance, columnDistance) {
           if (rowDistance > 0) {
               animate(down);
               rowDistance--;
@@ -158,7 +238,6 @@
               rowDistance++;
               bringToCenter(rowDistance, columnDistance);
           } else {
-            // console.log(columnDistance);
             if (columnDistance > 0) {
                 animate(left);
                 columnDistance--;
@@ -167,73 +246,35 @@
                 animate(right);
                 columnDistance++;
                 bringToCenter(rowDistance, columnDistance);
-            } else {
-                console.log("centered");
             }
           }
-      }
+      };
 
       var $wrap = $("#wrap")[0];
       var wrapAttr = $wrap.getBoundingClientRect();
 
-
-
-      function findFingerPosition(frame, pointable){
-
-      var interactionBox = frame.interactionBox;
-      var normalizedPosition = interactionBox.normalizePoint(pointable.tipPosition, true);
-        // WRAP 
-      var wrapXAxis = Math.round((wrapAttr.width + wrapAttr.left) * normalizedPosition[0]);
-      var wrapYAxis = Math.round((wrapAttr.height + wrapAttr.top) * (1 - normalizedPosition[1]));
+      var columnsCenters;
+      var rowsCenters;
 
 
 
-        var elem = document.elementFromPoint(wrapXAxis, wrapYAxis);
-
-        if($(elem).parent().hasClass("frame")){
-          $frame.find("div").removeClass("selected");
-          $(elem).addClass("selected");
-        }
-
-      }
-
-      function findClosestSlide(frame){
-        var interactionBox = frame.interactionBox;
-        var normalizedPosition = interactionBox.normalizePoint(frame.pointables[0].tipPosition, true);
-
-        var wrapXAxis = Math.round((wrapAttr.width + wrapAttr.left) * normalizedPosition[0]);
-        var wrapYAxis = Math.round((wrapAttr.height + wrapAttr.top) * (1 - normalizedPosition[1]));
-
-        var vectors = [];
-        $frame.find("div").each(function(){
-          vectors.push(findElementsCenterPosition(this));
-        });
-
-        for(var x = 0 ; x < vectors.length; x++){
-            console.log(Math.round(Math.abs(vectors[x][0])), Math.round(Math.abs(vectors[x][1])));
-        }
-      }
-
-
-      function findElementsCenterPosition($element){
-        var elementAttr = $element.getBoundingClientRect();
-
-        return [elementAttr.left + (elementAttr.width / 2) + wrapAttr.left, elementAttr.top + (elementAttr.height / 2) + wrapAttr.top];
-      }
-
-      function findRowClassOffset() {
-          var offset = 2 - posibleYPositions.indexOf(selectedRow);
+      // Helper Functions for Center in a Slide
+      var findRowClassOffset = function () {
+          var offset = Math.floor(posibleYPositions.length / 2) - posibleYPositions.indexOf(selectedRowClass);
           return offset;
-      }
+      };
 
-      function findColumnClassOffset() {
-          var offset = 2 - posibleXPositions.indexOf(selectedColumn);
+      var findColumnClassOffset = function () {
+          var offset = Math.floor(posibleYPositions.length / 2) - posibleXPositions.indexOf(selectedColumnClass);
           return offset;
-      }
+      };
 
-      var rowClassOffset = findRowClassOffset();
-      var columnClassOffset = findColumnClassOffset();
+      // var rowClassOffset = findRowClassOffset();
+      // var columnClassOffset = findColumnClassOffset();
 
+
+
+      // Callback after transitionend event
       var endAnimating = function(){
         animating = false;
       };
@@ -247,15 +288,14 @@
 
         controller.connect();
 
-        var oneSlide = $frame.find("div").first();
+        var oneSlide = $slideDivs.first();
         oneSlide.on("transitionend", endAnimating);
 
-        $(document).ready(function(){        
+        $(document).ready(function(){
             $(document.body).on('mouseover', function(e){
                 var elem = document.elementFromPoint(e.pageX, e.pageY);
                 
-                // console.log('you selected element id: ' + elem.className);
-                $frame.find("div").removeClass("selected");
+                $slideDivs.removeClass("selected");
                 $(elem).addClass("selected");
             });
         });
@@ -278,10 +318,16 @@
                 break;
               case 90:
                 $(".frame").toggleClass("zoomed-out");
+                zoomedOut = !zoomedOut;
+                oneSlide.on("transitionend", findCenterPositionsOfAllSlides);
                 break;
               case 67:
                 $(".frame").toggleClass("zoomed-out");
-                bringToCenter(rowClassOffset, columnClassOffset);
+                zoomedOut = !zoomedOut;
+
+                var rowDistance = findRowClassOffset();
+                var columnDistance = findColumnClassOffset();
+                bringToCenter(rowDistance, columnDistance);
                 break;
             }
           });
