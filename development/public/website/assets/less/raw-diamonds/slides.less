@@ -12,12 +12,15 @@
 @picture-and-margin: @picture-size + @margin;
 
 body {
-  background: url("../images/wall.jpg") no-repeat;
-  background-size: cover;
+  // background: url("../images/wall.jpg") no-repeat;
+  // background-size: cover;
+  background-color: white;
 }
 
 .wrap {
+  outline: 1px solid #BADA55;
   width: 50%;
+  height: auto;
   max-height: 100%;
   margin: 0 auto;
 }
@@ -25,9 +28,18 @@ body {
 .frame {
   position: relative;
   width: 100%;
-  padding-bottom: 100%;
+  padding-top: 100%;
   overflow: hidden;
 }
+
+canvas {
+  outline: 1px solid red;
+  margin: 0 auto;
+  position: absolute;
+  transform: translateY(-100%);
+  // z-index: -1;
+}
+
 
 .frame > div { 
   width: @picture-size;
