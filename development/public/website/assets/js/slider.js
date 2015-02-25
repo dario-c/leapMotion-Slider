@@ -219,10 +219,11 @@
       };
 
       var restartBorderAttributes = function(){
+        clearCanvas();
         border = {};
         border.size = 10;
-        leftBorder = rightBorder = bottomBorder = 0;
-        topBorder = -250;
+        leftLineLength = rightLineLength = bottomLineLength = 0;
+        topLineLength = -250;
       };
       
       var addClassSelected = function(){
@@ -291,8 +292,6 @@
       };
 
 
-
-
       // Helper Functions for Center in a Slide
       var findRowClassOffset = function (colClass) {
           var offset = Math.floor(posibleYPositions.length / 2) - posibleYPositions.indexOf(colClass);
@@ -311,56 +310,91 @@
 
       var canvas = $(".feedback-canvas")[0];
       var ctx = canvas.getContext("2d");
-      var topBorder = -250;
-      var rightBorder = 0;
-      var bottomBorder = 0;
-      var leftBorder = 0;
-      var increment = 5;
+
+
+      var topLineLength = -250;
+      var rightLineLength = 0;
+      var bottomLineLength= 0;
+      var leftLineLength = 0;
+      var increment = 7;
+      var incrementThreshold = increment + Math.floor(increment / 2);
 
       var border = {};
       border.size = 10;
 
+      var chosenOne = false;
 
       var animateBorder = function(){
-        var canvasX = columnsCenters[selectedColumnIndex];
-        var canvasY = rowsCenters[selectedRowIndex];
-        var distance = (slidesSize[0] / 2) + border.size;
+        var slideCenterX = columnsCenters[selectedColumnIndex];
+        var slideCenterY = rowsCenters[selectedRowIndex];
+        var halfBorder = border.size / 2;
+        var distanceToBorder = (slidesSize[0] / 2) + halfBorder;
 
-        var startX = canvasX - distance;
-        var startY = canvasY - distance - (border.size / 2);
+        // Start at Top-left corner
+        var start = [ slideCenterX - distanceToBorder - halfBorder, slideCenterY - distanceToBorder];
+        var topRightStart = [  slideCenterX + distanceToBorder, slideCenterY - distanceToBorder - halfBorder];
+        var bottomRightStart = [  slideCenterX + distanceToBorder + halfBorder, slideCenterY + distanceToBorder];
+        var bottomLeftStart = [  slideCenterX - distanceToBorder, slideCenterY + distanceToBorder + halfBorder];
 
         var squareSide = slidesSize[0] + (border.size * 2);
 
+        border.start = [start[0], start[1]];
 
-        border.start = [startX, startY];
+        if (chosenOne) {
+          console.log("decision taken");
+          var rowClassOffset = findRowClassOffset(selectedRowClass);
+          var columnClassOffset = findColumnClassOffset(selectedColumnClass);
+          bringToCenter(rowClassOffset, columnClassOffset);
+          $(".frame").toggleClass("zoomed-out");
+          clearCanvas();
+          zoomedOut = !zoomedOut;
+          chosenOne = false;
+        } else {
 
-        switch(true){
-          case (topBorder + increment + 2) < squareSide:
-            topBorder += increment;
-            border.toRight = [startX + topBorder, startY];
-            border.toTop = border.toBottom = border.toLeft = border.toRight;
-            break;
+          switch(true){
+            case (topLineLength + incrementThreshold) < squareSide:
+              topLineLength += increment;
+              border.toRight = [start[0] + topLineLength, start[1]];
+              drawLine(border.start, border.toRight);
+              break;
 
-          case rightBorder + increment + 5 < squareSide:
-            rightBorder += increment;
-            border.toBottom = [startX + topBorder, startY + rightBorder];
-            break;
+            case (rightLineLength + incrementThreshold) < squareSide:
+              rightLineLength += increment;
+              border.toBottom = [ slideCenterX + distanceToBorder, slideCenterY - distanceToBorder - halfBorder + rightLineLength ];
+              drawLine(topRightStart, border.toBottom);
+              break;
 
-          case bottomBorder + increment + 5 < squareSide:
-            bottomBorder += increment;
-            border.toLeft = [startX + topBorder - bottomBorder , startY + rightBorder];
-            break;
+            case (bottomLineLength + incrementThreshold) < squareSide:
+              bottomLineLength += increment;
+              border.toLeft = [slideCenterX + distanceToBorder + halfBorder - bottomLineLength , slideCenterY + distanceToBorder ];
+              drawLine(bottomRightStart, border.toLeft);
+              break;
 
-          case leftBorder + increment + 5 < squareSide:
-            leftBorder += increment;
-            border.toTop = [startX + topBorder - bottomBorder  , startY + rightBorder];
-            break;
-
+            case (leftLineLength + incrementThreshold) < squareSide:
+              leftLineLength += increment;
+              border.toTop = [  slideCenterX - distanceToBorder, slideCenterY + distanceToBorder + halfBorder - leftLineLength ];
+              drawLine(bottomLeftStart, border.toTop);
+              break;
+            default:
+              chosenOne = true;
+              break;
+          }
         }
 
-        drawBorder();
       };
 
+      var drawLine = function(start, finish){
+        ctx.beginPath();
+        ctx.moveTo(start[0], start[1]);
+        ctx.lineTo(finish[0], finish[1]);
+        ctx.lineWidth = border.size;
+        ctx.strokeStyle = "white";
+        ctx.stroke();
+      };
+
+      var clearCanvas = function(){
+        ctx.clearRect(0, 0, 950, 950);
+      };
 
       var drawBorder = function(){
         ctx.clearRect(0, 0, 950, 950);
@@ -369,13 +403,15 @@
         ctx.moveTo(border.start[0], border.start[1]);
         ctx.lineTo(border.toRight[0], border.toRight[1]);
         ctx.lineTo(border.toBottom[0], border.toBottom[1]);
-        ctx.lineTo(border.toLeft[0], border.toLeft[1]);
-        ctx.lineTo(border.toTop[0], border.toTop[1]);
+        // ctx.lineTo(border.toLeft[0], border.toLeft[1]);
+        // ctx.lineTo(border.toTop[0], border.toTop[1]);
 
-        ctx.lineWidth = border.size + 2;
+        ctx.lineWidth = border.size;
         ctx.strokeStyle = "white";
         ctx.stroke();
       };
+
+
 
       var init = function (){
         appendSlides();
