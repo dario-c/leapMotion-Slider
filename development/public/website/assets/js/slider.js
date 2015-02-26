@@ -21,6 +21,7 @@
 
       // DOM Elements and Attributes
       var $wrap = $("#wrap")[0];
+      var $canvas = $(".feedback-canvas")[0];
       var $frame = $(".frame");
       var $slideDivs;
       var oneSlide;
@@ -28,7 +29,7 @@
       var wrapAttr = $wrap.getBoundingClientRect();
 
       // States Variables
-      var sliding = false;
+      var transitioning = false;
       var zoomedOut = true; // TO-DO: Change back to false
 
       var centerPositionsFound = false;
@@ -84,6 +85,11 @@
         oneSlide = $slideDivs.first()[0];
       };
 
+      var resizeCanvas = function(){
+        wrapAttr = $wrap.getBoundingClientRect();
+        $canvas.width = wrapAttr.width;
+        $canvas.height = wrapAttr.height;
+      };
 
       var controller = new Leap.Controller();
 
@@ -135,7 +141,7 @@
             changeClass(rows, posibleYPositions, false); // down
             break;
         }
-        sliding = true;
+        transitioning = true;
       };
 
 
@@ -147,10 +153,7 @@
       };
 
       var processFrameZoomedOut = function(frame){
-         // Check every 3 frames
-          // if(frame.id % 3 === 0){
             selectSlide(frame);
-          // }
       };
 
       var processFrameZoomedIn = function(frame){
@@ -162,8 +165,19 @@
 
         var horizontal = Math.abs(translationX) > Math.abs(translationY) ? true : false;
 
-        if(!sliding){
+        if(!transitioning){
 
+          if(frame.hands.length >= 2){
+            var hand2 = frame.hands[1];
+            var finger1Position = hand.pointables[1].stabilizedTipPosition;
+            var finger2Position = hand2.pointables[1].stabilizedTipPosition;
+
+            if(Math.abs(finger1Position[0] - finger2Position[0]) < 50 && Math.abs(finger1Position[1] - finger2Position[1]) < 10){
+              transitioning = true;
+              zoomOut();
+            }
+          }
+          
           if(horizontal) {
 
             if(translationX < -translationThreshold) {
@@ -206,7 +220,7 @@
         selectedRowIndex = rowDistanceToTip.indexOf(Math.min.apply(null, rowDistanceToTip));
 
         // Check if there has been no change
-        if(lastSelectedIndexes[0] === selectedColumnIndex && lastSelectedIndexes[1] === selectedRowIndex ){
+        if(lastSelectedIndexes[0] === selectedColumnIndex && lastSelectedIndexes[1] === selectedRowIndex && !transitioning){
           animateBorder();
         } else {
           lastSelectedIndexes = [];
@@ -221,7 +235,7 @@
       var restartBorderAttributes = function(){
         clearCanvas();
         border = {};
-        border.size = 10;
+        border.size = 13;
         leftLineLength = rightLineLength = bottomLineLength = 0;
         topLineLength = -250;
       };
@@ -230,11 +244,11 @@
         selectedColumnClass = posibleXPositionsReversed[selectedColumnIndex];
         selectedRowClass = posibleYPositions[selectedRowIndex];
 
-        $slideDivs.removeClass("selected");
-        $("." + selectedColumnClass + "." + selectedRowClass).addClass("selected");
+        // $slideDivs.removeClass("selected");
+        // $("." + selectedColumnClass + "." + selectedRowClass).addClass("selected");
+        drawBorder();
       };
 
-      // to be Run on init and Zoom-out once + TO-DO on-resize
       var findCenterPositionsOfAllSlides = function(){
         if(!centerPositionsFound){
           centerPositionsFound = true;
@@ -291,6 +305,12 @@
           }
       };
 
+      var zoomOut = function(){
+        $(".frame").toggleClass("zoomed-out");
+        zoomedOut = !zoomedOut;
+        // oneSlide.on("transitionend", findCenterPositionsOfAllSlides);
+      };
+
 
       // Helper Functions for Center in a Slide
       var findRowClassOffset = function (colClass) {
@@ -305,7 +325,7 @@
 
       // Callback after transitionend event
       var endSliding = function(){
-        sliding = false;
+        transitioning = false;
       };
 
       var canvas = $(".feedback-canvas")[0];
@@ -325,6 +345,7 @@
       var chosenOne = false;
 
       var animateBorder = function(){
+        // console.log(slidesSize, "<-");
         var slideCenterX = columnsCenters[selectedColumnIndex];
         var slideCenterY = rowsCenters[selectedRowIndex];
         var halfBorder = border.size / 2;
@@ -341,7 +362,7 @@
         border.start = [start[0], start[1]];
 
         if (chosenOne) {
-          console.log("decision taken");
+          // console.log("decision taken");
           var rowClassOffset = findRowClassOffset(selectedRowClass);
           var columnClassOffset = findColumnClassOffset(selectedColumnClass);
           bringToCenter(rowClassOffset, columnClassOffset);
@@ -397,29 +418,58 @@
       };
 
       var drawBorder = function(){
+        console.log("HERE");
+
+        var slideCenterX = columnsCenters[selectedColumnIndex];
+        var slideCenterY = rowsCenters[selectedRowIndex];
+        var halfBorder = border.size / 2;
+        var distanceToBorder = (slidesSize[0] / 2) + halfBorder;
+
+        // Start at Top-left corner
+        var start = [ slideCenterX - distanceToBorder, slideCenterY - distanceToBorder];
+        var topRightStart = [  slideCenterX + distanceToBorder, slideCenterY - distanceToBorder];
+        var bottomRightStart = [  slideCenterX + distanceToBorder, slideCenterY + distanceToBorder];
+        var bottomLeftStart = [  slideCenterX - distanceToBorder, slideCenterY + distanceToBorder];
+
+        border.start = [start[0], start[1]];
+
         ctx.clearRect(0, 0, 950, 950);
         ctx.beginPath();
-        // 
-        ctx.moveTo(border.start[0], border.start[1]);
-        ctx.lineTo(border.toRight[0], border.toRight[1]);
-        ctx.lineTo(border.toBottom[0], border.toBottom[1]);
-        // ctx.lineTo(border.toLeft[0], border.toLeft[1]);
-        // ctx.lineTo(border.toTop[0], border.toTop[1]);
+
+        ctx.moveTo(start[0],start[1]);
+        ctx.lineTo(topRightStart[0], topRightStart[1]);
+        ctx.lineTo(bottomRightStart[0], bottomRightStart[1]);
+        ctx.lineTo(bottomLeftStart[0], bottomLeftStart[1]);
+        ctx.lineTo(start[0],start[1] - halfBorder);
 
         ctx.lineWidth = border.size;
-        ctx.strokeStyle = "white";
+        ctx.strokeStyle = "#BADA55";
         ctx.stroke();
       };
 
+      var adaptValuesToScreen = function(){
+        resizeCanvas();
+        centerPositionsFound = false;
+
+        var oneSlide = $slideDivs.first();
+        slidesSize = findElementsSize(oneSlide[0]);
+        
+        findCenterPositionsOfAllSlides();
+        // console.log("adapted ", centerPositionsFound);
+      };
 
 
       var init = function (){
         appendSlides();
 
         // TO-DO findCenterPositionsOfAllSlides might only be needed in Zooming-out
+        resizeCanvas();
         findCenterPositionsOfAllSlides();
+
         controller.on("frame", processFrame);
         controller.connect();
+
+        window.onresize = adaptValuesToScreen;
 
         var oneSlide = $slideDivs.first();
         slidesSize = findElementsSize(oneSlide[0]);
@@ -427,7 +477,6 @@
 
 
         // Just for Debugging 
-
         if(ns.DEBUG){
           $(document).ready(function(){
             $(document.body).on("mouseover", function(e){
@@ -453,9 +502,7 @@
                 slide(down);
                 break;
               case 90:
-                $(".frame").toggleClass("zoomed-out");
-                zoomedOut = !zoomedOut;
-                oneSlide.on("transitionend", findCenterPositionsOfAllSlides);
+                zoomOut();
                 break;
               case 67:
                 $(".frame").toggleClass("zoomed-out");
