@@ -32,7 +32,6 @@
       var transitioning = false;
       var zoomedOut = true; // TO-DO: Change back to false
 
-      var centerPositionsFound = false;
       var columnsCenters;
       var rowsCenters;
       
@@ -146,89 +145,93 @@
 
 
       var processFrame = function(frame){
-        if(frame.hands.length > 0){
+        if(frame.hands.length > 0 && !transitioning){
           var process = zoomedOut ? processFrameZoomedOut : processFrameZoomedIn;
           process(frame);
         }
       };
 
       var processFrameZoomedOut = function(frame){
-            selectSlide(frame);
+            processPointingFinger(frame);
       };
 
       var processFrameZoomedIn = function(frame){
         var hand = frame.hands[0];
 
+        if(frame.hands.length >= 2){
+          processTwoHands (hand, frame);
+        }
+        processMainHand(hand, frame);
+      };
+
+      var processTwoHands = function(hand, frame){
+        var hand2 = frame.hands[1];
+        var finger1Position = hand.pointables[1].stabilizedTipPosition;
+        var finger2Position = hand2.pointables[1].stabilizedTipPosition;
+
+        if(Math.abs(finger1Position[0] - finger2Position[0]) < 50 && Math.abs(finger1Position[1] - finger2Position[1]) < 10){
+          zoomOut();
+        }
+      };
+
+      var processMainHand = function(hand, frame){
         var translation = hand.translation(controller.frame(10));
         var translationX = translation[0];
         var translationY = translation[1];
 
         var horizontal = Math.abs(translationX) > Math.abs(translationY) ? true : false;
 
-        if(!transitioning){
-
-          if(frame.hands.length >= 2){
-            var hand2 = frame.hands[1];
-            var finger1Position = hand.pointables[1].stabilizedTipPosition;
-            var finger2Position = hand2.pointables[1].stabilizedTipPosition;
-
-            if(Math.abs(finger1Position[0] - finger2Position[0]) < 50 && Math.abs(finger1Position[1] - finger2Position[1]) < 10){
-              transitioning = true;
-              zoomOut();
-            }
+        if(horizontal) {
+          if(translationX < -translationThreshold) {
+            slide(left);
+          } else if (translationX > translationThreshold)  {
+            slide(right);
           }
-          
-          if(horizontal) {
+        } else {
 
-            if(translationX < -translationThreshold) {
-              slide(left);
-            } else if (translationX > translationThreshold)  {
-              slide(right);
-            }
-          } else {
-
-            if(translationY < -translationThreshold) {
-              slide(down);
-            } else if (translationY > translationThreshold ) {
-              slide(up);
-            }
+          if(translationY < -translationThreshold) {
+            slide(down);
+          } else if (translationY > translationThreshold ) {
+            slide(up);
           }
         }
       };
 
-
       var lastSelectedIndexes = [];
 
-      var selectSlide = function(frame){
+      var processPointingFinger = function(frame){
         var interactionBox = frame.interactionBox;
         var normalizedPosition = interactionBox.normalizePoint(frame.pointables[0].tipPosition, true);
 
         var tipPositionInWrapX = Math.round((wrapAttr.width) * normalizedPosition[0]); // Number between 0 and the wrap-width
-        var tipPositionInWrapY = Math.round((wrapAttr.height) * (1 - normalizedPosition[1])); //  Number bzetween 0 and the wrap-height
+        var tipPositionInWrapY = Math.round((wrapAttr.height) * (1 - normalizedPosition[1])); //  Number between 0 and the wrap-height
 
-        var columnDistanceToTip = [];
-        var rowDistanceToTip = [];
+        var distancesToTip = {columns: [], rows: []};
 
-        // Find how far tbe center of the slides are from the pointing finger
-        for(var x = 0; x < columnsCenters.length; x++){
-          columnDistanceToTip.push(Math.abs(tipPositionInWrapX - columnsCenters[x]));
-          rowDistanceToTip.push(Math.abs(tipPositionInWrapY - rowsCenters[x]));
-        }
+        findSlideDistanceToPosition(tipPositionInWrapX, tipPositionInWrapY, distancesToTip);
+        getIndexOfClosestSlide(distancesToTip);
 
-        // Get the slide that is closest to pointing finger
-        selectedColumnIndex =  columnDistanceToTip.indexOf(Math.min.apply(null, columnDistanceToTip));
-        selectedRowIndex = rowDistanceToTip.indexOf(Math.min.apply(null, rowDistanceToTip));
-
-        // Check if there has been no change
-        if(lastSelectedIndexes[0] === selectedColumnIndex && lastSelectedIndexes[1] === selectedRowIndex && !transitioning){
+        // Check if there has been no change since last frame
+        if(lastSelectedIndexes[0] === selectedColumnIndex && lastSelectedIndexes[1] === selectedRowIndex){
           animateBorder();
         } else {
           lastSelectedIndexes = [];
           lastSelectedIndexes.push(selectedColumnIndex, selectedRowIndex);
 
           restartBorderAttributes();
-          addClassSelected();
-          
+          selectSlide();
+        }
+      };
+
+      var getIndexOfClosestSlide = function(distancesToTip){
+        selectedColumnIndex =  distancesToTip.columns.indexOf(Math.min.apply(null, distancesToTip.columns));
+        selectedRowIndex = distancesToTip.rows.indexOf(Math.min.apply(null, distancesToTip.rows));
+      };
+
+      var findSlideDistanceToPosition = function(positionX, positionY, distancesToTip){
+        for(var x = 0; x < columnsCenters.length; x++){
+          distancesToTip.columns.push(Math.abs(positionX - columnsCenters[x]));
+          distancesToTip.rows.push(Math.abs(positionY - rowsCenters[x]));
         }
       };
 
@@ -239,19 +242,14 @@
         leftLineLength = rightLineLength = bottomLineLength = 0;
         topLineLength = -250;
       };
-      
-      var addClassSelected = function(){
+
+      var selectSlide = function(){
         selectedColumnClass = posibleXPositionsReversed[selectedColumnIndex];
         selectedRowClass = posibleYPositions[selectedRowIndex];
-
-        // $slideDivs.removeClass("selected");
-        // $("." + selectedColumnClass + "." + selectedRowClass).addClass("selected");
-        drawBorder();
+        drawFullBorder();
       };
 
       var findCenterPositionsOfAllSlides = function(){
-        if(!centerPositionsFound){
-          centerPositionsFound = true;
           columnsCenters = [];
           rowsCenters = [];
 
@@ -266,7 +264,6 @@
 
           columnsCenters.sort(sortNumber);
           rowsCenters.sort(sortNumber);
-        }
       };
 
       var findElementsCenterPosition = function($element){
@@ -306,9 +303,10 @@
       };
 
       var zoomOut = function(){
+        clearCanvas();
         $(".frame").toggleClass("zoomed-out");
         zoomedOut = !zoomedOut;
-        // oneSlide.on("transitionend", findCenterPositionsOfAllSlides);
+        transitioning = true;
       };
 
 
@@ -323,7 +321,6 @@
           return offset;
       };
 
-      // Callback after transitionend event
       var endSliding = function(){
         transitioning = false;
       };
@@ -332,7 +329,7 @@
       var ctx = canvas.getContext("2d");
 
 
-      var topLineLength = -250;
+      var topLineLength = 0;
       var rightLineLength = 0;
       var bottomLineLength= 0;
       var leftLineLength = 0;
@@ -340,68 +337,70 @@
       var incrementThreshold = increment + Math.floor(increment / 2);
 
       var border = {};
-      border.size = 10;
+      border.size = 20;
 
-      var chosenOne = false;
+      var slideCenterX, slideCenterY, halfBorder, distanceToBorder, topLeftCorner, topRightStart, bottomRightStart, bottomLeftStart, squareSide;
+
+      var calculateCanvasBorders = function(){
+        slideCenterX = columnsCenters[selectedColumnIndex];
+        slideCenterY = rowsCenters[selectedRowIndex];
+        halfBorder = border.size / 2;
+        distanceToBorder = (slidesSize[0] / 2) + halfBorder;
+
+        // Corners of the border
+        topLeftCorner = [ slideCenterX - distanceToBorder - halfBorder, slideCenterY - distanceToBorder];
+        topRightStart = [  slideCenterX + distanceToBorder, slideCenterY - distanceToBorder - halfBorder];
+        bottomRightStart = [  slideCenterX + distanceToBorder + halfBorder, slideCenterY + distanceToBorder];
+        bottomLeftStart = [  slideCenterX - distanceToBorder, slideCenterY + distanceToBorder + halfBorder];
+
+        squareSide = slidesSize[0] + (border.size * 2);
+
+        border.start = [topLeftCorner[0], topLeftCorner[1]];
+      };
+
 
       var animateBorder = function(){
-        // console.log(slidesSize, "<-");
-        var slideCenterX = columnsCenters[selectedColumnIndex];
-        var slideCenterY = rowsCenters[selectedRowIndex];
-        var halfBorder = border.size / 2;
-        var distanceToBorder = (slidesSize[0] / 2) + halfBorder;
+        calculateCanvasBorders();
+        switch(true){
+          case (topLineLength + incrementThreshold) < squareSide:
+            topLineLength += increment;
+            border.toRight = [topLeftCorner[0] + topLineLength, topLeftCorner[1]];
+            drawLine(border.start, border.toRight);
+            break;
 
-        // Start at Top-left corner
-        var start = [ slideCenterX - distanceToBorder - halfBorder, slideCenterY - distanceToBorder];
-        var topRightStart = [  slideCenterX + distanceToBorder, slideCenterY - distanceToBorder - halfBorder];
-        var bottomRightStart = [  slideCenterX + distanceToBorder + halfBorder, slideCenterY + distanceToBorder];
-        var bottomLeftStart = [  slideCenterX - distanceToBorder, slideCenterY + distanceToBorder + halfBorder];
+          case (rightLineLength + incrementThreshold) < squareSide:
+            rightLineLength += increment;
+            border.toBottom = [ slideCenterX + distanceToBorder, slideCenterY - distanceToBorder - halfBorder + rightLineLength ];
+            drawLine(topRightStart, border.toBottom);
+            break;
 
-        var squareSide = slidesSize[0] + (border.size * 2);
+          case (bottomLineLength + incrementThreshold) < squareSide:
+            bottomLineLength += increment;
+            border.toLeft = [slideCenterX + distanceToBorder + halfBorder - bottomLineLength , slideCenterY + distanceToBorder ];
+            drawLine(bottomRightStart, border.toLeft);
+            break;
 
-        border.start = [start[0], start[1]];
+          case (leftLineLength + incrementThreshold) < squareSide:
+            leftLineLength += increment;
+            border.toTop = [  slideCenterX - distanceToBorder, slideCenterY + distanceToBorder + halfBorder - leftLineLength ];
+            drawLine(bottomLeftStart, border.toTop);
+            break;
+          default:
+            zoomInOne();
+            break;
+        }
+      };
 
-        if (chosenOne) {
-          // console.log("decision taken");
+
+      var zoomInOne = function(){
           var rowClassOffset = findRowClassOffset(selectedRowClass);
           var columnClassOffset = findColumnClassOffset(selectedColumnClass);
+
           bringToCenter(rowClassOffset, columnClassOffset);
           $(".frame").toggleClass("zoomed-out");
-          clearCanvas();
           zoomedOut = !zoomedOut;
-          chosenOne = false;
-        } else {
-
-          switch(true){
-            case (topLineLength + incrementThreshold) < squareSide:
-              topLineLength += increment;
-              border.toRight = [start[0] + topLineLength, start[1]];
-              drawLine(border.start, border.toRight);
-              break;
-
-            case (rightLineLength + incrementThreshold) < squareSide:
-              rightLineLength += increment;
-              border.toBottom = [ slideCenterX + distanceToBorder, slideCenterY - distanceToBorder - halfBorder + rightLineLength ];
-              drawLine(topRightStart, border.toBottom);
-              break;
-
-            case (bottomLineLength + incrementThreshold) < squareSide:
-              bottomLineLength += increment;
-              border.toLeft = [slideCenterX + distanceToBorder + halfBorder - bottomLineLength , slideCenterY + distanceToBorder ];
-              drawLine(bottomRightStart, border.toLeft);
-              break;
-
-            case (leftLineLength + incrementThreshold) < squareSide:
-              leftLineLength += increment;
-              border.toTop = [  slideCenterX - distanceToBorder, slideCenterY + distanceToBorder + halfBorder - leftLineLength ];
-              drawLine(bottomLeftStart, border.toTop);
-              break;
-            default:
-              chosenOne = true;
-              break;
-          }
-        }
-
+          transitioning = true;
+          clearCanvas();
       };
 
       var drawLine = function(start, finish){
@@ -414,48 +413,46 @@
       };
 
       var clearCanvas = function(){
-        ctx.clearRect(0, 0, 950, 950);
+        ctx.clearRect(0, 0, $canvas.width, $canvas.height);
       };
 
-      var drawBorder = function(){
-        console.log("HERE");
-
-        var slideCenterX = columnsCenters[selectedColumnIndex];
-        var slideCenterY = rowsCenters[selectedRowIndex];
-        var halfBorder = border.size / 2;
-        var distanceToBorder = (slidesSize[0] / 2) + halfBorder;
+      var calculateCanvasFullBorder = function(){
+        slideCenterX = columnsCenters[selectedColumnIndex];
+        slideCenterY = rowsCenters[selectedRowIndex];
+        halfBorder = border.size / 2;
+        distanceToBorder = (slidesSize[0] / 2) + halfBorder;
 
         // Start at Top-left corner
-        var start = [ slideCenterX - distanceToBorder, slideCenterY - distanceToBorder];
-        var topRightStart = [  slideCenterX + distanceToBorder, slideCenterY - distanceToBorder];
-        var bottomRightStart = [  slideCenterX + distanceToBorder, slideCenterY + distanceToBorder];
-        var bottomLeftStart = [  slideCenterX - distanceToBorder, slideCenterY + distanceToBorder];
+        topLeftCorner = [ slideCenterX - distanceToBorder, slideCenterY - distanceToBorder];
+        topRightStart = [  slideCenterX + distanceToBorder, slideCenterY - distanceToBorder];
+        bottomRightStart = [  slideCenterX + distanceToBorder, slideCenterY + distanceToBorder];
+        bottomLeftStart = [  slideCenterX - distanceToBorder, slideCenterY + distanceToBorder];
 
-        border.start = [start[0], start[1]];
+        // border.start = [start[0], start[1]];
+      }
 
-        ctx.clearRect(0, 0, 950, 950);
+      var drawFullBorder = function(){
+        calculateCanvasFullBorder();
+
         ctx.beginPath();
-
-        ctx.moveTo(start[0],start[1]);
+        ctx.moveTo(topLeftCorner[0],topLeftCorner[1]);
         ctx.lineTo(topRightStart[0], topRightStart[1]);
         ctx.lineTo(bottomRightStart[0], bottomRightStart[1]);
         ctx.lineTo(bottomLeftStart[0], bottomLeftStart[1]);
-        ctx.lineTo(start[0],start[1] - halfBorder);
+        ctx.lineTo(topLeftCorner[0],topLeftCorner[1] - halfBorder);
 
         ctx.lineWidth = border.size;
         ctx.strokeStyle = "#BADA55";
         ctx.stroke();
       };
 
-      var adaptValuesToScreen = function(){
+      var adaptValuesToScreenSize = function(){
         resizeCanvas();
-        centerPositionsFound = false;
 
         var oneSlide = $slideDivs.first();
         slidesSize = findElementsSize(oneSlide[0]);
         
         findCenterPositionsOfAllSlides();
-        // console.log("adapted ", centerPositionsFound);
       };
 
 
@@ -469,7 +466,7 @@
         controller.on("frame", processFrame);
         controller.connect();
 
-        window.onresize = adaptValuesToScreen;
+        window.onresize = adaptValuesToScreenSize;
 
         var oneSlide = $slideDivs.first();
         slidesSize = findElementsSize(oneSlide[0]);
