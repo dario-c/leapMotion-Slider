@@ -12,6 +12,7 @@
     ns.Slider = function ()
     {
       var translationThreshold = 165;
+      var controller = new Leap.Controller();
 
       var imagesRoot = "website/assets/images/";
       var left = "left";
@@ -30,7 +31,7 @@
 
       // States Variables
       var transitioning = false;
-      var zoomedOut = true; // TO-DO: Change back to false
+      var zoomedOut = true; // TO-DO: Change back to false?
 
       var columnsCenters;
       var rowsCenters;
@@ -67,7 +68,6 @@
       
       var rows = [row1, row2, row3, row4, row5];
 
-
       var appendSlides = function(){
         var slides = [];
         for(var x = 0; x < rows.length; x++){
@@ -84,13 +84,23 @@
         oneSlide = $slideDivs.first()[0];
       };
 
-      var resizeCanvas = function(){
-        wrapAttr = $wrap.getBoundingClientRect();
-        $canvas.width = wrapAttr.width;
-        $canvas.height = wrapAttr.height;
+      var slide = function(direction) {
+        switch(direction){
+          case left:
+            changeClass(columns, posibleXPositions, false); // left
+            break;
+          case up:
+            changeClass(rows, posibleYPositions, true); // up
+            break;
+          case right:
+            changeClass(columns, posibleXPositions, true); // right
+            break;
+          case down:
+            changeClass(rows, posibleYPositions, false); // down
+            break;
+        }
+        transitioning = true;
       };
-
-      var controller = new Leap.Controller();
 
       var changeClass = function(columnOrRow, posiblePositions, positive) {
          // Loop through all Columns or Rows
@@ -103,7 +113,6 @@
             .removeClass(columnOrRow[x].oldClass);
         }
       };
-
 
       var updateElement = function(columnOrRow, posiblePositions, positive){
         var oldPosition = posiblePositions.indexOf(columnOrRow.posClass);
@@ -124,25 +133,11 @@
         }
       };
 
-
-      var slide = function(direction) {
-        switch(direction){
-          case left:
-            changeClass(columns, posibleXPositions, false); // left
-            break;
-          case up:
-            changeClass(rows, posibleYPositions, true); // up
-            break;
-          case right:
-            changeClass(columns, posibleXPositions, true); // right
-            break;
-          case down:
-            changeClass(rows, posibleYPositions, false); // down
-            break;
-        }
-        transitioning = true;
+      var resizeCanvas = function(){
+        wrapAttr = $wrap.getBoundingClientRect();
+        $canvas.width = wrapAttr.width;
+        $canvas.height = wrapAttr.height;
       };
-
 
       var processFrame = function(frame){
         if(frame.hands.length > 0 && !transitioning){
@@ -218,14 +213,9 @@
           lastSelectedIndexes = [];
           lastSelectedIndexes.push(selectedColumnIndex, selectedRowIndex);
 
-          restartBorderAttributes();
+          setStartingBorderAttributes();
           selectSlide();
         }
-      };
-
-      var getIndexOfClosestSlide = function(distancesToTip){
-        selectedColumnIndex =  distancesToTip.columns.indexOf(Math.min.apply(null, distancesToTip.columns));
-        selectedRowIndex = distancesToTip.rows.indexOf(Math.min.apply(null, distancesToTip.rows));
       };
 
       var findSlideDistanceToPosition = function(positionX, positionY, distancesToTip){
@@ -235,7 +225,12 @@
         }
       };
 
-      var restartBorderAttributes = function(){
+      var getIndexOfClosestSlide = function(distancesToTip){
+        selectedColumnIndex =  distancesToTip.columns.indexOf(Math.min.apply(null, distancesToTip.columns));
+        selectedRowIndex = distancesToTip.rows.indexOf(Math.min.apply(null, distancesToTip.rows));
+      };
+
+      var setStartingBorderAttributes = function(){
         clearCanvas();
         border = {};
         border.size = 13;
@@ -250,20 +245,19 @@
       };
 
       var findCenterPositionsOfAllSlides = function(){
-          columnsCenters = [];
-          rowsCenters = [];
+        columnsCenters = [];
+        rowsCenters = [];
 
-          $slideDivs.each(function(i){
-            if(i < columns.length){
-              columnsCenters.push(findElementsCenterPosition(this)[0]);
-            }
-            if(i % rows.length === 0){
-              rowsCenters.push(findElementsCenterPosition(this)[1]);
-            }
-          });
-
-          columnsCenters.sort(sortNumber);
-          rowsCenters.sort(sortNumber);
+        $slideDivs.each(function(i){
+          if(i < columns.length){
+            columnsCenters.push(findElementsCenterPosition(this)[0]);
+          }
+          if(i % rows.length === 0){
+            rowsCenters.push(findElementsCenterPosition(this)[1]);
+          }
+        });
+        columnsCenters.sort(sortNumber);
+        rowsCenters.sort(sortNumber);
       };
 
       var findElementsCenterPosition = function($element){
@@ -281,25 +275,25 @@
       };
 
       var bringToCenter = function (rowDistance, columnDistance) {
-          if (rowDistance > 0) {
-              slide(down);
-              rowDistance--;
+        if (rowDistance > 0) {
+            slide(down);
+            rowDistance--;
+            bringToCenter(rowDistance, columnDistance);
+        } else if (rowDistance < 0) {
+            slide(up);
+            rowDistance++;
+            bringToCenter(rowDistance, columnDistance);
+        } else {
+          if (columnDistance > 0) {
+              slide(left);
+              columnDistance--;
               bringToCenter(rowDistance, columnDistance);
-          } else if (rowDistance < 0) {
-              slide(up);
-              rowDistance++;
+          } else if (columnDistance < 0) {
+              slide(right);
+              columnDistance++;
               bringToCenter(rowDistance, columnDistance);
-          } else {
-            if (columnDistance > 0) {
-                slide(left);
-                columnDistance--;
-                bringToCenter(rowDistance, columnDistance);
-            } else if (columnDistance < 0) {
-                slide(right);
-                columnDistance++;
-                bringToCenter(rowDistance, columnDistance);
-            }
           }
+        }
       };
 
       var zoomOut = function(){
@@ -309,16 +303,14 @@
         transitioning = true;
       };
 
-
-      // Helper Functions for Center in a Slide
       var findRowClassOffset = function (colClass) {
-          var offset = Math.floor(posibleYPositions.length / 2) - posibleYPositions.indexOf(colClass);
-          return offset;
+        var offset = Math.floor(posibleYPositions.length / 2) - posibleYPositions.indexOf(colClass);
+        return offset;
       };
 
       var findColumnClassOffset = function (rowClass) {
-          var offset = Math.floor(posibleYPositions.length / 2) - posibleXPositions.indexOf(rowClass);
-          return offset;
+        var offset = Math.floor(posibleYPositions.length / 2) - posibleXPositions.indexOf(rowClass);
+        return offset;
       };
 
       var endSliding = function(){
@@ -329,43 +321,74 @@
       var ctx = canvas.getContext("2d");
 
 
-      var topLineLength = 0;
-      var rightLineLength = 0;
-      var bottomLineLength= 0;
-      var leftLineLength = 0;
+      var slideCenterX, slideCenterY, halfBorder, distanceToBorder, topLeftCorner, topRightStart, bottomRightStart, bottomLeftStart, squareSide;
+      var topLineLength, rightLineLength, bottomLineLength, leftLineLength, border;
       var increment = 7;
       var incrementThreshold = increment + Math.floor(increment / 2);
 
-      var border = {};
-      border.size = 20;
 
-      var slideCenterX, slideCenterY, halfBorder, distanceToBorder, topLeftCorner, topRightStart, bottomRightStart, bottomLeftStart, squareSide;
-
-      var calculateCanvasBorders = function(){
+      var calculateBorders = function(animated){
         slideCenterX = columnsCenters[selectedColumnIndex];
         slideCenterY = rowsCenters[selectedRowIndex];
         halfBorder = border.size / 2;
         distanceToBorder = (slidesSize[0] / 2) + halfBorder;
 
-        // Corners of the border
+        var findCorners = animated ? findCornersAnimated : findCornersStatic;
+        findCorners();
+      };
+
+      var findCornersStatic = function(){
+        topLeftCorner = [ slideCenterX - distanceToBorder, slideCenterY - distanceToBorder];
+        topRightStart = [  slideCenterX + distanceToBorder, slideCenterY - distanceToBorder];
+        bottomRightStart = [  slideCenterX + distanceToBorder, slideCenterY + distanceToBorder];
+        bottomLeftStart = [  slideCenterX - distanceToBorder, slideCenterY + distanceToBorder];
+      };
+
+      var findCornersAnimated = function(){
         topLeftCorner = [ slideCenterX - distanceToBorder - halfBorder, slideCenterY - distanceToBorder];
         topRightStart = [  slideCenterX + distanceToBorder, slideCenterY - distanceToBorder - halfBorder];
         bottomRightStart = [  slideCenterX + distanceToBorder + halfBorder, slideCenterY + distanceToBorder];
         bottomLeftStart = [  slideCenterX - distanceToBorder, slideCenterY + distanceToBorder + halfBorder];
 
         squareSide = slidesSize[0] + (border.size * 2);
-
         border.start = [topLeftCorner[0], topLeftCorner[1]];
       };
 
+      var drawFullBorder = function(){
+        calculateBorders(false);
+
+        ctx.beginPath();
+        ctx.moveTo(topLeftCorner[0],topLeftCorner[1]);
+        ctx.lineTo(topRightStart[0], topRightStart[1]);
+        ctx.lineTo(bottomRightStart[0], bottomRightStart[1]);
+        ctx.lineTo(bottomLeftStart[0], bottomLeftStart[1]);
+        ctx.lineTo(topLeftCorner[0],topLeftCorner[1] - halfBorder);
+
+        ctx.lineWidth = border.size;
+        ctx.strokeStyle = "#BADA55";
+        ctx.stroke();
+      };
+
+      var drawLine = function(start, finish){
+        ctx.beginPath();
+        ctx.moveTo(start[0], start[1]);
+        ctx.lineTo(finish[0], finish[1]);
+        ctx.lineWidth = border.size;
+        ctx.strokeStyle = "white";
+        ctx.stroke();
+      };
 
       var animateBorder = function(){
-        calculateCanvasBorders();
+        calculateBorders(true);
         switch(true){
           case (topLineLength + incrementThreshold) < squareSide:
+            console.log(topLineLength);
             topLineLength += increment;
-            border.toRight = [topLeftCorner[0] + topLineLength, topLeftCorner[1]];
-            drawLine(border.start, border.toRight);
+
+            if(topLineLength >= 0){ // Ignore the offset given to delay animation
+              border.toRight = [topLeftCorner[0] + topLineLength, topLeftCorner[1]];
+              drawLine(border.start, border.toRight);
+            }
             break;
 
           case (rightLineLength + incrementThreshold) < squareSide:
@@ -393,63 +416,25 @@
 
 
       var zoomInOne = function(){
-          var rowClassOffset = findRowClassOffset(selectedRowClass);
-          var columnClassOffset = findColumnClassOffset(selectedColumnClass);
+        var rowClassOffset = findRowClassOffset(selectedRowClass);
+        var columnClassOffset = findColumnClassOffset(selectedColumnClass);
 
-          bringToCenter(rowClassOffset, columnClassOffset);
-          $(".frame").toggleClass("zoomed-out");
-          zoomedOut = !zoomedOut;
-          transitioning = true;
-          clearCanvas();
+        bringToCenter(rowClassOffset, columnClassOffset);
+        $(".frame").toggleClass("zoomed-out");
+        zoomedOut = !zoomedOut;
+        transitioning = true;
+        clearCanvas();
       };
 
-      var drawLine = function(start, finish){
-        ctx.beginPath();
-        ctx.moveTo(start[0], start[1]);
-        ctx.lineTo(finish[0], finish[1]);
-        ctx.lineWidth = border.size;
-        ctx.strokeStyle = "white";
-        ctx.stroke();
-      };
 
       var clearCanvas = function(){
         ctx.clearRect(0, 0, $canvas.width, $canvas.height);
       };
 
-      var calculateCanvasFullBorder = function(){
-        slideCenterX = columnsCenters[selectedColumnIndex];
-        slideCenterY = rowsCenters[selectedRowIndex];
-        halfBorder = border.size / 2;
-        distanceToBorder = (slidesSize[0] / 2) + halfBorder;
-
-        // Start at Top-left corner
-        topLeftCorner = [ slideCenterX - distanceToBorder, slideCenterY - distanceToBorder];
-        topRightStart = [  slideCenterX + distanceToBorder, slideCenterY - distanceToBorder];
-        bottomRightStart = [  slideCenterX + distanceToBorder, slideCenterY + distanceToBorder];
-        bottomLeftStart = [  slideCenterX - distanceToBorder, slideCenterY + distanceToBorder];
-
-        // border.start = [start[0], start[1]];
-      }
-
-      var drawFullBorder = function(){
-        calculateCanvasFullBorder();
-
-        ctx.beginPath();
-        ctx.moveTo(topLeftCorner[0],topLeftCorner[1]);
-        ctx.lineTo(topRightStart[0], topRightStart[1]);
-        ctx.lineTo(bottomRightStart[0], bottomRightStart[1]);
-        ctx.lineTo(bottomLeftStart[0], bottomLeftStart[1]);
-        ctx.lineTo(topLeftCorner[0],topLeftCorner[1] - halfBorder);
-
-        ctx.lineWidth = border.size;
-        ctx.strokeStyle = "#BADA55";
-        ctx.stroke();
-      };
-
       var adaptValuesToScreenSize = function(){
         resizeCanvas();
 
-        var oneSlide = $slideDivs.first();
+        oneSlide = $slideDivs.first();
         slidesSize = findElementsSize(oneSlide[0]);
         
         findCenterPositionsOfAllSlides();
@@ -459,7 +444,6 @@
       var init = function (){
         appendSlides();
 
-        // TO-DO findCenterPositionsOfAllSlides might only be needed in Zooming-out
         resizeCanvas();
         findCenterPositionsOfAllSlides();
 
@@ -468,7 +452,7 @@
 
         window.onresize = adaptValuesToScreenSize;
 
-        var oneSlide = $slideDivs.first();
+        oneSlide = $slideDivs.first();
         slidesSize = findElementsSize(oneSlide[0]);
         oneSlide.on("transitionend", endSliding);
 
@@ -502,18 +486,15 @@
                 zoomOut();
                 break;
               case 67:
-                $(".frame").toggleClass("zoomed-out");
-                zoomedOut = !zoomedOut;
-
-                var rowClassOffset = findRowClassOffset(selectedRowClass);
-                var columnClassOffset = findColumnClassOffset(selectedColumnClass);
-                bringToCenter(rowClassOffset, columnClassOffset);
+                zoomInOne();
                 break;
             }
           });
         }
       };
       init();
+
+
     };
 
 })(window.Caviar);
