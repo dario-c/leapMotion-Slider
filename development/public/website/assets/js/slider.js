@@ -20,7 +20,7 @@
       var up = "up";
       var down = "down";
 
-      // DOM Elements and Attributes
+      // DOM Elements and Elements' Attributes
       var $wrap = $("#wrap")[0];
       var $canvas = $(".feedback-canvas")[0];
       var $frame = $(".frame");
@@ -31,17 +31,13 @@
 
       // States Variables
       var transitioning = false;
-      var zoomedOut = true; // TO-DO: Change back to false?
+      var zoomedOut = true;
+
+      var selectedSlide = {};
+      var lastSelectedIndexes = [];
 
       var columnsCenters;
       var rowsCenters;
-      
-      // Selected Element Attributes
-      var selectedColumnClass;
-      var selectedRowClass;
-      var selectedColumnIndex;
-      var selectedRowIndex;
-
 
       var posibleXPositions = ["rightest", "right", "middle", "left", "leftest" ];
       var posibleYPositions = ["topmost", "top", "center", "bottom", "bottommost"];
@@ -72,9 +68,9 @@
         var slides = [];
         for(var x = 0; x < rows.length; x++){
           for(var y = 0; y < columns.length; y++ ){
-            var $newSlide = $("<div></div>");
+            var $newSlide = $("<div data-artist=" + rows[x].artist + "></div>");
             $newSlide.addClass(rows[x].name + " " + columns[y].name + " " + rows[x].posClass + " " +columns[y].posClass);
-            $newSlide.css({ "background-image": "url(" + imagesRoot + rows[x].artist + "-0" + (y+2) + rows[x].extension + ")"});
+            $newSlide.css({ "background-image": "url(" + imagesRoot + rows[x].artist + "-0" + (y+1) + rows[x].extension + ")"});
 
             slides.push($newSlide);
           }
@@ -87,22 +83,22 @@
       var slide = function(direction) {
         switch(direction){
           case left:
-            changeClass(columns, posibleXPositions, false); // left
+            changeClasses(columns, posibleXPositions, false); // left
             break;
           case up:
-            changeClass(rows, posibleYPositions, true); // up
+            changeClasses(rows, posibleYPositions, true); // up
             break;
           case right:
-            changeClass(columns, posibleXPositions, true); // right
+            changeClasses(columns, posibleXPositions, true); // right
             break;
           case down:
-            changeClass(rows, posibleYPositions, false); // down
+            changeClasses(rows, posibleYPositions, false); // down
             break;
         }
         transitioning = true;
       };
 
-      var changeClass = function(columnOrRow, posiblePositions, positive) {
+      var changeClasses = function(columnOrRow, posiblePositions, positive) {
          // Loop through all Columns or Rows
         for(var x = 0; x < columnOrRow.length; x++) {
           // Update elements attributes
@@ -141,16 +137,16 @@
 
       var processFrame = function(frame){
         if(frame.hands.length > 0 && !transitioning){
-          var process = zoomedOut ? processFrameZoomedOut : processFrameZoomedIn;
+          var process = zoomedOut ? processZoomedOutFrame : processZoomedInFrame;
           process(frame);
         }
       };
 
-      var processFrameZoomedOut = function(frame){
-            processPointingFinger(frame);
+      var processZoomedOutFrame = function(frame){
+        processPointingFinger(frame);
       };
 
-      var processFrameZoomedIn = function(frame){
+      var processZoomedInFrame = function(frame){
         var hand = frame.hands[0];
 
         if(frame.hands.length >= 2){
@@ -192,8 +188,6 @@
         }
       };
 
-      var lastSelectedIndexes = [];
-
       var processPointingFinger = function(frame){
         var interactionBox = frame.interactionBox;
         var normalizedPosition = interactionBox.normalizePoint(frame.pointables[0].tipPosition, true);
@@ -204,16 +198,19 @@
         var distancesToTip = {columns: [], rows: []};
 
         findSlideDistanceToPosition(tipPositionInWrapX, tipPositionInWrapY, distancesToTip);
-        getIndexOfClosestSlide(distancesToTip);
+        getIndexesOfClosestSlide(distancesToTip);
 
         // Check if there has been no change since last frame
-        if(lastSelectedIndexes[0] === selectedColumnIndex && lastSelectedIndexes[1] === selectedRowIndex){
+        if(lastSelectedIndexes[0] === selectedSlide.columnIndex && lastSelectedIndexes[1] === selectedSlide.rowIndex){
+          calculateBorders(true);
           animateBorder();
         } else {
           lastSelectedIndexes = [];
-          lastSelectedIndexes.push(selectedColumnIndex, selectedRowIndex);
+          lastSelectedIndexes.push(selectedSlide.columnIndex, selectedSlide.rowIndex);
 
           setStartingBorderAttributes();
+          calculateBorders(false);
+
           selectSlide();
         }
       };
@@ -225,22 +222,22 @@
         }
       };
 
-      var getIndexOfClosestSlide = function(distancesToTip){
-        selectedColumnIndex =  distancesToTip.columns.indexOf(Math.min.apply(null, distancesToTip.columns));
-        selectedRowIndex = distancesToTip.rows.indexOf(Math.min.apply(null, distancesToTip.rows));
+      var getIndexesOfClosestSlide = function(distancesToTip){
+        selectedSlide.columnIndex =  distancesToTip.columns.indexOf(Math.min.apply(null, distancesToTip.columns));
+        selectedSlide.rowIndex = distancesToTip.rows.indexOf(Math.min.apply(null, distancesToTip.rows));
       };
 
       var setStartingBorderAttributes = function(){
         clearCanvas();
         border = {};
         border.size = 13;
-        leftLineLength = rightLineLength = bottomLineLength = 0;
-        topLineLength = -250;
+        animatedBorders.leftLineLength = animatedBorders.rightLineLength = animatedBorders.bottomLineLength = 0;
+        animatedBorders.topLineLength = -250;
       };
 
       var selectSlide = function(){
-        selectedColumnClass = posibleXPositionsReversed[selectedColumnIndex];
-        selectedRowClass = posibleYPositions[selectedRowIndex];
+        selectedSlide.columnClass = posibleXPositionsReversed[selectedSlide.columnIndex];
+        selectedSlide.rowClass = posibleYPositions[selectedSlide.rowIndex];
         drawFullBorder();
       };
 
@@ -271,36 +268,41 @@
       };
 
       var sortNumber = function(a,b) {
-          return a - b;
+        return a - b;
       };
 
       var bringToCenter = function (rowDistance, columnDistance) {
         if (rowDistance > 0) {
-            slide(down);
-            rowDistance--;
-            bringToCenter(rowDistance, columnDistance);
+          slide(down);
+          rowDistance--;
+          bringToCenter(rowDistance, columnDistance);
+
         } else if (rowDistance < 0) {
-            slide(up);
-            rowDistance++;
-            bringToCenter(rowDistance, columnDistance);
+          slide(up);
+          rowDistance++;
+          bringToCenter(rowDistance, columnDistance);
+        
         } else {
+
           if (columnDistance > 0) {
-              slide(left);
-              columnDistance--;
-              bringToCenter(rowDistance, columnDistance);
+            slide(left);
+            columnDistance--;
+            bringToCenter(rowDistance, columnDistance);
+
           } else if (columnDistance < 0) {
-              slide(right);
-              columnDistance++;
-              bringToCenter(rowDistance, columnDistance);
+            slide(right);
+            columnDistance++;
+            bringToCenter(rowDistance, columnDistance);
           }
         }
       };
 
       var zoomOut = function(){
+        transitioning = true;
         clearCanvas();
+        setStartingBorderAttributes();
         $(".frame").toggleClass("zoomed-out");
         zoomedOut = !zoomedOut;
-        transitioning = true;
       };
 
       var findRowClassOffset = function (colClass) {
@@ -317,52 +319,51 @@
         transitioning = false;
       };
 
-      var canvas = $(".feedback-canvas")[0];
-      var ctx = canvas.getContext("2d");
+      var ctx = $canvas.getContext("2d");
 
+// HERE
+      var slideCenterX, slideCenterY, halfBorder, distanceToBorder, squareSide;
+      var border;
 
-      var slideCenterX, slideCenterY, halfBorder, distanceToBorder, topLeftCorner, topRightStart, bottomRightStart, bottomLeftStart, squareSide;
-      var topLineLength, rightLineLength, bottomLineLength, leftLineLength, border;
       var increment = 7;
       var incrementThreshold = increment + Math.floor(increment / 2);
 
+      var staticBorders = {};
+      var animatedBorders = {};
 
       var calculateBorders = function(animated){
-        slideCenterX = columnsCenters[selectedColumnIndex];
-        slideCenterY = rowsCenters[selectedRowIndex];
+        slideCenterX = columnsCenters[selectedSlide.columnIndex];
+        slideCenterY = rowsCenters[selectedSlide.rowIndex];
         halfBorder = border.size / 2;
         distanceToBorder = (slidesSize[0] / 2) + halfBorder;
 
-        var findCorners = animated ? findCornersAnimated : findCornersStatic;
-        findCorners();
+        var findBorders = animated ? findCornersAnimatedBorder : findCornersStaticBorder;
+        findBorders();
       };
 
-      var findCornersStatic = function(){
-        topLeftCorner = [ slideCenterX - distanceToBorder, slideCenterY - distanceToBorder];
-        topRightStart = [  slideCenterX + distanceToBorder, slideCenterY - distanceToBorder];
-        bottomRightStart = [  slideCenterX + distanceToBorder, slideCenterY + distanceToBorder];
-        bottomLeftStart = [  slideCenterX - distanceToBorder, slideCenterY + distanceToBorder];
+      var findCornersStaticBorder = function(){
+        staticBorders.topLeftStart = [     slideCenterX - distanceToBorder, slideCenterY - distanceToBorder];
+        staticBorders.topRightStart = [    slideCenterX + distanceToBorder, slideCenterY - distanceToBorder];
+        staticBorders.bottomRightStart = [ slideCenterX + distanceToBorder, slideCenterY + distanceToBorder];
+        staticBorders.bottomLeftStart = [  slideCenterX - distanceToBorder, slideCenterY + distanceToBorder];
       };
 
-      var findCornersAnimated = function(){
-        topLeftCorner = [ slideCenterX - distanceToBorder - halfBorder, slideCenterY - distanceToBorder];
-        topRightStart = [  slideCenterX + distanceToBorder, slideCenterY - distanceToBorder - halfBorder];
-        bottomRightStart = [  slideCenterX + distanceToBorder + halfBorder, slideCenterY + distanceToBorder];
-        bottomLeftStart = [  slideCenterX - distanceToBorder, slideCenterY + distanceToBorder + halfBorder];
+      var findCornersAnimatedBorder = function(){
+        animatedBorders.topLeftStart = [     slideCenterX - distanceToBorder - halfBorder, slideCenterY - distanceToBorder];
+        animatedBorders.topRightStart = [    slideCenterX + distanceToBorder,              slideCenterY - distanceToBorder - halfBorder];
+        animatedBorders.bottomRightStart = [ slideCenterX + distanceToBorder + halfBorder, slideCenterY + distanceToBorder];
+        animatedBorders.bottomLeftStart = [  slideCenterX - distanceToBorder,              slideCenterY + distanceToBorder + halfBorder];
 
         squareSide = slidesSize[0] + (border.size * 2);
-        border.start = [topLeftCorner[0], topLeftCorner[1]];
       };
 
       var drawFullBorder = function(){
-        calculateBorders(false);
-
         ctx.beginPath();
-        ctx.moveTo(topLeftCorner[0],topLeftCorner[1]);
-        ctx.lineTo(topRightStart[0], topRightStart[1]);
-        ctx.lineTo(bottomRightStart[0], bottomRightStart[1]);
-        ctx.lineTo(bottomLeftStart[0], bottomLeftStart[1]);
-        ctx.lineTo(topLeftCorner[0],topLeftCorner[1] - halfBorder);
+        ctx.moveTo(staticBorders.topLeftStart[0],     staticBorders.topLeftStart[1]);
+        ctx.lineTo(staticBorders.topRightStart[0],    staticBorders.topRightStart[1]);
+        ctx.lineTo(staticBorders.bottomRightStart[0], staticBorders.bottomRightStart[1]);
+        ctx.lineTo(staticBorders.bottomLeftStart[0],  staticBorders.bottomLeftStart[1]);
+        ctx.lineTo(staticBorders.topLeftStart[0],     staticBorders.topLeftStart[1] - halfBorder);
 
         ctx.lineWidth = border.size;
         ctx.strokeStyle = "#BADA55";
@@ -379,34 +380,33 @@
       };
 
       var animateBorder = function(){
-        calculateBorders(true);
         switch(true){
-          case (topLineLength + incrementThreshold) < squareSide:
-            console.log(topLineLength);
-            topLineLength += increment;
+          // Increase line length until it has reach the size of a square side
+          case (animatedBorders.topLineLength + incrementThreshold) < squareSide:
+            animatedBorders.topLineLength += increment;
 
-            if(topLineLength >= 0){ // Ignore the offset given to delay animation
-              border.toRight = [topLeftCorner[0] + topLineLength, topLeftCorner[1]];
-              drawLine(border.start, border.toRight);
+            if(animatedBorders.topLineLength >= 0){ // Ignore the offset given to delay animation
+              border.toRight = [animatedBorders.topLeftStart[0] + animatedBorders.topLineLength, animatedBorders.topLeftStart[1]];
+              drawLine(animatedBorders.topLeftStart, border.toRight);
             }
             break;
 
-          case (rightLineLength + incrementThreshold) < squareSide:
-            rightLineLength += increment;
-            border.toBottom = [ slideCenterX + distanceToBorder, slideCenterY - distanceToBorder - halfBorder + rightLineLength ];
-            drawLine(topRightStart, border.toBottom);
+          case (animatedBorders.rightLineLength + incrementThreshold) < squareSide:
+            animatedBorders.rightLineLength += increment;
+            border.toBottom = [ slideCenterX + distanceToBorder, slideCenterY - distanceToBorder - halfBorder + animatedBorders.rightLineLength ];
+            drawLine(animatedBorders.topRightStart, border.toBottom);
             break;
 
-          case (bottomLineLength + incrementThreshold) < squareSide:
-            bottomLineLength += increment;
-            border.toLeft = [slideCenterX + distanceToBorder + halfBorder - bottomLineLength , slideCenterY + distanceToBorder ];
-            drawLine(bottomRightStart, border.toLeft);
+          case (animatedBorders.bottomLineLength + incrementThreshold) < squareSide:
+            animatedBorders.bottomLineLength += increment;
+            border.toLeft = [slideCenterX + distanceToBorder + halfBorder - animatedBorders.bottomLineLength , slideCenterY + distanceToBorder ];
+            drawLine(animatedBorders.bottomRightStart, border.toLeft);
             break;
 
-          case (leftLineLength + incrementThreshold) < squareSide:
-            leftLineLength += increment;
-            border.toTop = [  slideCenterX - distanceToBorder, slideCenterY + distanceToBorder + halfBorder - leftLineLength ];
-            drawLine(bottomLeftStart, border.toTop);
+          case (animatedBorders.leftLineLength + incrementThreshold) < squareSide:
+            animatedBorders.leftLineLength += increment;
+            border.toTop = [  slideCenterX - distanceToBorder, slideCenterY + distanceToBorder + halfBorder - animatedBorders.leftLineLength ];
+            drawLine(animatedBorders.bottomLeftStart, border.toTop);
             break;
           default:
             zoomInOne();
@@ -416,8 +416,8 @@
 
 
       var zoomInOne = function(){
-        var rowClassOffset = findRowClassOffset(selectedRowClass);
-        var columnClassOffset = findColumnClassOffset(selectedColumnClass);
+        var rowClassOffset = findRowClassOffset(selectedSlide.rowClass);
+        var columnClassOffset = findColumnClassOffset(selectedSlide.columnClass);
 
         bringToCenter(rowClassOffset, columnClassOffset);
         $(".frame").toggleClass("zoomed-out");
@@ -438,6 +438,7 @@
         slidesSize = findElementsSize(oneSlide[0]);
         
         findCenterPositionsOfAllSlides();
+        setStartingBorderAttributes();
       };
 
 
@@ -455,7 +456,6 @@
         oneSlide = $slideDivs.first();
         slidesSize = findElementsSize(oneSlide[0]);
         oneSlide.on("transitionend", endSliding);
-
 
         // Just for Debugging 
         if(ns.DEBUG){
@@ -493,8 +493,6 @@
         }
       };
       init();
-
-
     };
 
 })(window.Caviar);
