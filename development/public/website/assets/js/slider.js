@@ -321,7 +321,6 @@
 
       var ctx = $canvas.getContext("2d");
 
-// HERE
       var slideCenterX, slideCenterY, halfBorder, distanceToBorder, squareSide;
       var border;
 
