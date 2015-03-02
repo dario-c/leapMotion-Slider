@@ -21,13 +21,13 @@
       var down = "down";
 
       // DOM Elements and Elements' Attributes
-      var $wrap = $("#wrap")[0];
-      var $canvas = $(".feedback-canvas")[0];
+      var wrap = $("#wrap")[0];
+      var canvas = $(".feedback-canvas")[0];
       var $frame = $(".frame");
       var $slideDivs;
       var oneSlide;
       var slidesSize;
-      var wrapAttr = $wrap.getBoundingClientRect();
+      var wrapAttr = wrap.getBoundingClientRect();
 
       // States Variables
       var transitioning = false;
@@ -130,9 +130,9 @@
       };
 
       var resizeCanvas = function(){
-        wrapAttr = $wrap.getBoundingClientRect();
-        $canvas.width = wrapAttr.width;
-        $canvas.height = wrapAttr.height;
+        wrapAttr = wrap.getBoundingClientRect();
+        canvas.width = wrapAttr.width;
+        canvas.height = wrapAttr.height;
       };
 
       var processFrame = function(frame){
@@ -319,7 +319,7 @@
         transitioning = false;
       };
 
-      var ctx = $canvas.getContext("2d");
+      var ctx = canvas.getContext("2d");
 
       var slideCenterX, slideCenterY, halfBorder, distanceToBorder, squareSide;
       var border;
@@ -427,7 +427,7 @@
 
 
       var clearCanvas = function(){
-        ctx.clearRect(0, 0, $canvas.width, $canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
       };
 
       var adaptValuesToScreenSize = function(){
