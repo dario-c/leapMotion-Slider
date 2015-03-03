@@ -12,28 +12,39 @@
 @picture-and-margin: @picture-size + @margin;
 
 body {
-  background: url("../images/wall.jpg") no-repeat;
-  background-size: cover;
+  background-color: white;
 }
 
 .wrap {
   width: 50%;
+  height: auto;
   max-height: 100%;
   margin: 0 auto;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%)
 }
 
 .frame {
   position: relative;
   width: 100%;
-  padding-bottom: 100%;
+  padding-top: 100%;
   overflow: hidden;
 }
+
+canvas {
+  margin: 0 auto;
+  position: absolute;
+  transform: translateY(-100%);
+}
+
 
 .frame > div { 
   width: @picture-size;
   height: @picture-size;
   position: absolute;
-  transition: all 0.5s ease;
+  transition: top 0.5s ease, left 0.5s ease, outline 0s;
   background: center center no-repeat;
   background-size: contain;
 }
@@ -63,6 +74,7 @@ body {
   .center {      top: @margin-small +  (@picture-and-margin-small * 2) }
   .bottom {      top: @margin-small +  (@picture-and-margin-small * 3) }
   .bottommost {  top: @margin-small +  (@picture-and-margin-small * 4) }
+
   
   .leftest {   left: @margin-small }
   .left {      left: @margin-small +   @picture-and-margin-small }

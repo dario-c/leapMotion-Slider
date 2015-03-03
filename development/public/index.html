@@ -101,14 +101,15 @@
 <body>
 
     <div id="wrap" class="wrap">
-      <div class="frame">
-      </div>
+        <div class="frame zoomed-out">
+        </div>
+        <canvas class="feedback-canvas" width="960" height="960"></canvas>
     </div>
-
 
     <!-- build:js website/assets/js/application.js -->
         <script src="website/assets/js/lib/leapjs/leap-0.6.4.js"></script>
         <script src="website/assets/js/lib/leapjs-plugins/main/hand-entry/leap.hand-entry.js"></script>
+        <script src="website/assets/js/lib/leapjs-plugins/main/screen-position/leap.screen-position.js"></script>
         <!-- bower:js -->
         <script src="website/assets/js/lib/bower/jquery/dist/jquery.js"></script>
         <!-- endinject -->
