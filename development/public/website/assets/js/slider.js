@@ -20,30 +20,21 @@
       var up = "up";
       var down = "down";
 
-      // DOM Elements and Elements' Attributes
-      var wrap = $("#wrap")[0];
-      // var canvas = $(".feedback-ns.canvas")[0];
-      // var ctx = ns.canvas.getContext("2d");
 
-
-
+      // CANVAS FUNCTIONS
       var Canvas = ns.Canvas();
       var drawLine = Canvas.drawLine;
       var drawFullBorder = Canvas.drawFullBorder;
       var clearCanvas = Canvas.clearCanvas;
       var calculateBorders = Canvas.calculateBorders;
       var animateBorder = Canvas.animateBorder;
-
-
-
-
-
+      var resizeCanvas = Canvas.resizeCanvas;
+      var setStartingBorderAttributes = Canvas.setStartingBorderAttributes;
 
 
       var $frame = $(".frame");
       var $slideDivs;
       var oneSlide;
-      var wrapAttr = wrap.getBoundingClientRect();
 
       // States Variables
       var transitioning = false;
@@ -142,12 +133,6 @@
         }
       };
 
-      var resizeCanvas = function(){
-        wrapAttr = wrap.getBoundingClientRect();
-        ns.canvas.width = wrapAttr.width;
-        ns.canvas.height = wrapAttr.height;
-      };
-
       var processFrame = function(frame){
         if(frame.hands.length > 0 && !transitioning){
           var process = zoomedOut ? processZoomedOutFrame : processZoomedInFrame;
@@ -205,8 +190,8 @@
         var interactionBox = frame.interactionBox;
         var normalizedPosition = interactionBox.normalizePoint(frame.pointables[0].tipPosition, true);
 
-        var tipPositionInWrapX = Math.round((wrapAttr.width) * normalizedPosition[0]); // Number between 0 and the wrap-width
-        var tipPositionInWrapY = Math.round((wrapAttr.height) * (1 - normalizedPosition[1])); //  Number between 0 and the wrap-height
+        var tipPositionInWrapX = Math.round((ns.wrapAttr.width) * normalizedPosition[0]); // Number between 0 and the wrap-width
+        var tipPositionInWrapY = Math.round((ns.wrapAttr.height) * (1 - normalizedPosition[1])); //  Number between 0 and the wrap-height
 
         var distancesToTip = {columns: [], rows: []};
 
@@ -240,13 +225,7 @@
         ns.selectedSlide.rowIndex = distancesToTip.rows.indexOf(Math.min.apply(null, distancesToTip.rows));
       };
 
-      var setStartingBorderAttributes = function(){
-        clearCanvas();
-        ns.border = {};
-        ns.border.size = 13;
-        ns.animatedBorders.leftLineLength = ns.animatedBorders.rightLineLength = ns.animatedBorders.bottomLineLength = 0;
-        ns.animatedBorders.topLineLength = -250;
-      };
+
 
       var selectSlide = function(){
         ns.selectedSlide.columnClass = posibleXPositionsReversed[ns.selectedSlide.columnIndex];
@@ -272,7 +251,7 @@
 
       var findElementsCenterPosition = function($element){
         var elementAttr = $element.getBoundingClientRect();
-        return [Math.round(elementAttr.left + (elementAttr.width / 2) - wrapAttr.left), Math.round(elementAttr.top + (elementAttr.height / 2) - wrapAttr.top)];
+        return [Math.round(elementAttr.left + (elementAttr.width / 2) - ns.wrapAttr.left), Math.round(elementAttr.top + (elementAttr.height / 2) - ns.wrapAttr.top)];
       };
 
       var findElementsSize = function($element){

@@ -8,24 +8,24 @@ window.Caviar = window.Caviar || {};
     ns.DEBUG = true;
     ns.body = document.body;
 
-    ns.canvas = $(".feedback-canvas")[0];
-    ns.ctx = ns.canvas.getContext("2d");
-    ns.border = {};
-    ns.staticBorders = {};
-    ns.halfBorder = undefined;
 
-    ns.slideCenterX = undefined;
-    ns.slideCenterY = undefined;
+    ns.border = {};
+
+
     ns.columnsCenters = undefined;
     ns.rowsCenters = undefined;
     ns.slideSize = undefined;
-    ns.distanceToBorder = undefined;
     ns.squareSide = undefined;
 
     ns.animatedBorders = {};
     ns.selectedSlide = {};
 
     ns.zoomInOne = undefined;
+
+    ns.wrap = $("#wrap")[0];
+    ns.wrapAttr = ns.wrap.getBoundingClientRect();
+
+
 
     // Events that can get dispatched
     ns.eventNames = {
