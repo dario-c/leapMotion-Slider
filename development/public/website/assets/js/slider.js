@@ -11,14 +11,15 @@
      */
     ns.Slider = function ()
     {
-      var translationThreshold = 165;
-      var controller = new Leap.Controller();
+      var controller = ns.controller;
 
       var imagesRoot = "website/assets/images/";
-      var left = "left";
-      var right = "right";
-      var up = "up";
-      var down = "down";
+      var left = ns.left;
+      var right = ns.right;
+      var up = ns.up;
+      var down = ns.down;
+
+
 
 
       // CANVAS FUNCTIONS
@@ -31,17 +32,21 @@
       var resizeCanvas = Canvas.resizeCanvas;
       var setStartingBorderAttributes = Canvas.setStartingBorderAttributes;
 
+      // LEAP FUNCTIONS
+      var LeapActions = ns.LeapActions();
+      var processFrame = LeapActions.processFrame;
+      var processZoomedOutFrame = LeapActions.processZoomedOutFrame;
+
 
       var $frame = $(".frame");
       var $slideDivs;
       var oneSlide;
 
       // States Variables
-      var transitioning = false;
-      var zoomedOut = true;
+      ns.transitioning = false;
+      ns.zoomedOut = true;
 
 
-      var lastSelectedIndexes = [];
 
       var posibleXPositions = ["rightest", "right", "middle", "left", "leftest" ];
       var posibleYPositions = ["topmost", "top", "center", "bottom", "bottommost"];
@@ -84,7 +89,7 @@
         oneSlide = $slideDivs.first()[0];
       };
 
-      var slide = function(direction) {
+      ns.slide = function(direction) {
         switch(direction){
           case left:
             changeClasses(columns, posibleXPositions, false); // left
@@ -99,7 +104,7 @@
             changeClasses(rows, posibleYPositions, false); // down
             break;
         }
-        transitioning = true;
+        ns.transitioning = true;
       };
 
       var changeClasses = function(columnOrRow, posiblePositions, positive) {
@@ -133,101 +138,25 @@
         }
       };
 
-      var processFrame = function(frame){
-        if(frame.hands.length > 0 && !transitioning){
-          var process = zoomedOut ? processZoomedOutFrame : processZoomedInFrame;
-          process(frame);
-        }
-      };
 
-      var processZoomedOutFrame = function(frame){
-        processPointingFinger(frame);
-      };
 
-      var processZoomedInFrame = function(frame){
-        var hand = frame.hands[0];
 
-        if(frame.hands.length >= 2){
-          processTwoHands (hand, frame);
-        }
-        processMainHand(hand, frame);
-      };
 
-      var processTwoHands = function(hand, frame){
-        var hand2 = frame.hands[1];
-        var finger1Position = hand.pointables[1].stabilizedTipPosition;
-        var finger2Position = hand2.pointables[1].stabilizedTipPosition;
-
-        if(Math.abs(finger1Position[0] - finger2Position[0]) < 50 && Math.abs(finger1Position[1] - finger2Position[1]) < 10){
-          zoomOut();
-        }
-      };
-
-      var processMainHand = function(hand, frame){
-        var translation = hand.translation(controller.frame(10));
-        var translationX = translation[0];
-        var translationY = translation[1];
-
-        var horizontal = Math.abs(translationX) > Math.abs(translationY) ? true : false;
-
-        if(horizontal) {
-          if(translationX < -translationThreshold) {
-            slide(left);
-          } else if (translationX > translationThreshold)  {
-            slide(right);
-          }
-        } else {
-
-          if(translationY < -translationThreshold) {
-            slide(down);
-          } else if (translationY > translationThreshold ) {
-            slide(up);
-          }
-        }
-      };
-
-      var processPointingFinger = function(frame){
-        var interactionBox = frame.interactionBox;
-        var normalizedPosition = interactionBox.normalizePoint(frame.pointables[0].tipPosition, true);
-
-        var tipPositionInWrapX = Math.round((ns.wrapAttr.width) * normalizedPosition[0]); // Number between 0 and the wrap-width
-        var tipPositionInWrapY = Math.round((ns.wrapAttr.height) * (1 - normalizedPosition[1])); //  Number between 0 and the wrap-height
-
-        var distancesToTip = {columns: [], rows: []};
-
-        findSlideDistanceToPosition(tipPositionInWrapX, tipPositionInWrapY, distancesToTip);
-        getIndexesOfClosestSlide(distancesToTip);
-
-        // Check if there has been no change since last frame
-        if(lastSelectedIndexes[0] === ns.selectedSlide.columnIndex && lastSelectedIndexes[1] === ns.selectedSlide.rowIndex){
-          calculateBorders(true);
-          animateBorder();
-        } else {
-          lastSelectedIndexes = [];
-          lastSelectedIndexes.push(ns.selectedSlide.columnIndex, ns.selectedSlide.rowIndex);
-
-          setStartingBorderAttributes();
-          calculateBorders(false);
-
-          selectSlide();
-        }
-      };
-
-      var findSlideDistanceToPosition = function(positionX, positionY, distancesToTip){
+      ns.findSlideDistanceToPosition = function(positionX, positionY, distancesToTip){
         for(var x = 0; x < ns.columnsCenters.length; x++){
           distancesToTip.columns.push(Math.abs(positionX - ns.columnsCenters[x]));
           distancesToTip.rows.push(Math.abs(positionY - ns.rowsCenters[x]));
         }
       };
 
-      var getIndexesOfClosestSlide = function(distancesToTip){
+      ns.getIndexesOfClosestSlide = function(distancesToTip){
         ns.selectedSlide.columnIndex =  distancesToTip.columns.indexOf(Math.min.apply(null, distancesToTip.columns));
         ns.selectedSlide.rowIndex = distancesToTip.rows.indexOf(Math.min.apply(null, distancesToTip.rows));
       };
 
 
 
-      var selectSlide = function(){
+      ns.selectSlide = function(){
         ns.selectedSlide.columnClass = posibleXPositionsReversed[ns.selectedSlide.columnIndex];
         ns.selectedSlide.rowClass = posibleYPositions[ns.selectedSlide.rowIndex];
         drawFullBorder();
@@ -265,36 +194,36 @@
 
       var bringToCenter = function (rowDistance, columnDistance) {
         if (rowDistance > 0) {
-          slide(down);
+          ns.slide(down);
           rowDistance--;
           bringToCenter(rowDistance, columnDistance);
 
         } else if (rowDistance < 0) {
-          slide(up);
+          ns.slide(up);
           rowDistance++;
           bringToCenter(rowDistance, columnDistance);
         
         } else {
 
           if (columnDistance > 0) {
-            slide(left);
+            ns.slide(left);
             columnDistance--;
             bringToCenter(rowDistance, columnDistance);
 
           } else if (columnDistance < 0) {
-            slide(right);
+            ns.slide(right);
             columnDistance++;
             bringToCenter(rowDistance, columnDistance);
           }
         }
       };
 
-      var zoomOut = function(){
-        transitioning = true;
+      ns.zoomOut = function(){
+        ns.transitioning = true;
         clearCanvas();
         setStartingBorderAttributes();
         $(".frame").toggleClass("zoomed-out");
-        zoomedOut = !zoomedOut;
+        ns.zoomedOut = !ns.zoomedOut;
       };
 
       var findRowClassOffset = function (colClass) {
@@ -308,7 +237,7 @@
       };
 
       var endSliding = function(){
-        transitioning = false;
+        ns.transitioning = false;
       };
 
       ns.zoomInOne = function(){
@@ -317,8 +246,8 @@
 
         bringToCenter(rowClassOffset, columnClassOffset);
         $(".frame").toggleClass("zoomed-out");
-        zoomedOut = !zoomedOut;
-        transitioning = true;
+        ns.zoomedOut = !ns.zoomedOut;
+        ns.transitioning = true;
         clearCanvas();
       };
 
@@ -362,22 +291,22 @@
           $(ns.body).on("keydown", function(key){
             switch(key.keyCode){
               case 37:
-                slide(left);
+                ns.slide(left);
                 break;
               case 38:
-                slide(up);
+                ns.slide(up);
                 break;
               case 39:
-                slide(right);
+                ns.slide(right);
                 break;
               case 40:
-                slide(down);
+                ns.slide(down);
                 break;
               case 90:
-                zoomOut();
+                ns.zoomOut();
                 break;
               case 67:
-                zoomInOne();
+                ns.zoomInOne();
                 break;
             }
           });

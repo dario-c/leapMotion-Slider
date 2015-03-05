@@ -69,10 +69,12 @@
     };
 
     var findCornersStaticBorder = function(){
+      console.log("findCornersStaticBorder");
       staticBorders.topLeftStart = [     slideCenterX - distanceToBorder, slideCenterY - distanceToBorder];
       staticBorders.topRightStart = [    slideCenterX + distanceToBorder, slideCenterY - distanceToBorder];
       staticBorders.bottomRightStart = [ slideCenterX + distanceToBorder, slideCenterY + distanceToBorder];
       staticBorders.bottomLeftStart = [  slideCenterX - distanceToBorder, slideCenterY + distanceToBorder];
+      console.log(staticBorders);
     };
 
     var drawLine = function(start, finish){
@@ -85,6 +87,8 @@
     };
 
     var drawFullBorder = function(){
+      console.log("Herrow!");
+      console.log(staticBorders);
       ctx.beginPath();
       ctx.moveTo(staticBorders.topLeftStart[0],     staticBorders.topLeftStart[1]);
       ctx.lineTo(staticBorders.topRightStart[0],    staticBorders.topRightStart[1]);

@@ -21,6 +21,24 @@ window.Caviar = window.Caviar || {};
     ns.wrap = $("#wrap")[0];
     ns.wrapAttr = ns.wrap.getBoundingClientRect();
 
+    ns.transitioning = false;
+    ns.zoomedOut = true;
+
+    ns.processZoomedOutFrame = undefined;
+    ns.processZoomedInFrame = undefined;
+    ns.slide = undefined;
+
+    ns.findSlideDistanceToPosition = undefined;
+    ns.getIndexesOfClosestSlide = undefined;
+
+    ns.controller = new Leap.Controller();
+
+    ns.left = "left";
+    ns.right = "right";
+    ns.up = "up";
+    ns.down = "down";
+
+
 
     // Events that can get dispatched
     ns.eventNames = {
