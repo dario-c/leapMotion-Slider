@@ -16,7 +16,6 @@ window.Caviar = window.Caviar || {};
 
     ns.selectedSlide = {};
 
-    ns.zoomInOne = undefined;
 
     ns.wrap = $("#wrap")[0];
     ns.wrapAttr = ns.wrap.getBoundingClientRect();
@@ -24,14 +23,18 @@ window.Caviar = window.Caviar || {};
     ns.transitioning = false;
     ns.zoomedOut = true;
 
-    ns.processZoomedOutFrame = undefined;
-    ns.processZoomedInFrame = undefined;
-    ns.slide = undefined;
-
-    ns.findSlideDistanceToPosition = undefined;
-    ns.getIndexesOfClosestSlide = undefined;
+    // ns.zoomInOne = undefined;
+    // ns.processZoomedOutFrame = undefined;
+    // ns.processZoomedInFrame = undefined;
+    // ns.slide = undefined;
+    // ns.findSlideDistanceToPosition = undefined;
+    // ns.getIndexesOfClosestSlide = undefined;
 
     ns.controller = new Leap.Controller();
+    
+    ns.staticBorders = {};
+    ns.halfBorder = undefined;
+
 
     ns.left = "left";
     ns.right = "right";

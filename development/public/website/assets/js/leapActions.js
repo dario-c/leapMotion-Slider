@@ -16,14 +16,9 @@
 
 
     // CANVAS FUNCTIONS
-    var Canvas = ns.Canvas();
-    var drawLine = Canvas.drawLine;
-    var drawFullBorder = Canvas.drawFullBorder;
-    var clearCanvas = Canvas.clearCanvas;
-    var calculateBorders = Canvas.calculateBorders;
-    var animateBorder = Canvas.animateBorder;
-    var resizeCanvas = Canvas.resizeCanvas;
-    var setStartingBorderAttributes = Canvas.setStartingBorderAttributes;
+    var Canvas = ns.CanvasObj;
+
+
 
 
     var processFrame = function(frame){
@@ -55,7 +50,7 @@
       var finger2Position = hand2.pointables[1].stabilizedTipPosition;
 
       if(Math.abs(finger1Position[0] - finger2Position[0]) < 50 && Math.abs(finger1Position[1] - finger2Position[1]) < 10){
-        ns.zoomOut();
+        ns.SliderObj.zoomOut();
       }
     };
 
@@ -71,16 +66,16 @@
 
       if(horizontal) {
         if(translationX < -translationThreshold) {
-          ns.slide(ns.left);
+          ns.SliderObj.slide(ns.left);
         } else if (translationX > translationThreshold)  {
-          ns.slide(ns.right);
+          ns.SliderObj.slide(ns.right);
         }
       } else {
 
         if(translationY < -translationThreshold) {
-          ns.slide(ns.down);
+          ns.SliderObj.slide(ns.down);
         } else if (translationY > translationThreshold ) {
-          ns.slide(ns.up);
+          ns.SliderObj.slide(ns.up);
         }
       }
     };
@@ -94,22 +89,21 @@
 
       var distancesToTip = {columns: [], rows: []};
 
-      ns.findSlideDistanceToPosition(tipPositionInWrapX, tipPositionInWrapY, distancesToTip);
-      ns.getIndexesOfClosestSlide(distancesToTip);
+      ns.SliderObj.findSlideDistanceToPosition(tipPositionInWrapX, tipPositionInWrapY, distancesToTip);
+      ns.SliderObj.getIndexesOfClosestSlide(distancesToTip);
 
       // Check if there has been no change since last frame
       if(lastSelectedIndexes[0] === ns.selectedSlide.columnIndex && lastSelectedIndexes[1] === ns.selectedSlide.rowIndex){
-        calculateBorders(true);
-        animateBorder();
+        Canvas.calculateBorders(true);
+        Canvas.animateBorder();
       } else {
-        console.log("good");
         lastSelectedIndexes = [];
         lastSelectedIndexes.push(ns.selectedSlide.columnIndex, ns.selectedSlide.rowIndex);
 
-        setStartingBorderAttributes();
-        calculateBorders(false);
+        Canvas.setStartingBorderAttributes();
+        Canvas.calculateBorders(false);
 
-        ns.selectSlide();
+        ns.SliderObj.selectSlide();
       }
     };
 
@@ -121,12 +115,7 @@
     init();
 
     return {
-      processFrame: processFrame,
-      processZoomedOutFrame: processZoomedOutFrame,
-      processZoomedInFrame: processZoomedInFrame,
-      processTwoHands: processTwoHands,
-      processMainHand: processMainHand
-
+      processFrame: processFrame
     };
   };
 

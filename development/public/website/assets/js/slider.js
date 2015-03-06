@@ -20,22 +20,13 @@
       var down = ns.down;
 
 
-
-
       // CANVAS FUNCTIONS
-      var Canvas = ns.Canvas();
-      var drawLine = Canvas.drawLine;
-      var drawFullBorder = Canvas.drawFullBorder;
-      var clearCanvas = Canvas.clearCanvas;
-      var calculateBorders = Canvas.calculateBorders;
-      var animateBorder = Canvas.animateBorder;
-      var resizeCanvas = Canvas.resizeCanvas;
-      var setStartingBorderAttributes = Canvas.setStartingBorderAttributes;
+      ns.CanvasObj = ns.Canvas();
+      var Canvas = ns.CanvasObj;
 
       // LEAP FUNCTIONS
-      var LeapActions = ns.LeapActions();
-      var processFrame = LeapActions.processFrame;
-      var processZoomedOutFrame = LeapActions.processZoomedOutFrame;
+      ns.LeapObj = ns.LeapActions();
+      var LeapActions = ns.LeapObj;
 
 
       var $frame = $(".frame");
@@ -89,7 +80,7 @@
         oneSlide = $slideDivs.first()[0];
       };
 
-      ns.slide = function(direction) {
+      var slide = function(direction) {
         switch(direction){
           case left:
             changeClasses(columns, posibleXPositions, false); // left
@@ -139,27 +130,23 @@
       };
 
 
-
-
-
-      ns.findSlideDistanceToPosition = function(positionX, positionY, distancesToTip){
+      var findSlideDistanceToPosition = function(positionX, positionY, distancesToTip){
         for(var x = 0; x < ns.columnsCenters.length; x++){
           distancesToTip.columns.push(Math.abs(positionX - ns.columnsCenters[x]));
           distancesToTip.rows.push(Math.abs(positionY - ns.rowsCenters[x]));
         }
       };
 
-      ns.getIndexesOfClosestSlide = function(distancesToTip){
+      var getIndexesOfClosestSlide = function(distancesToTip){
         ns.selectedSlide.columnIndex =  distancesToTip.columns.indexOf(Math.min.apply(null, distancesToTip.columns));
         ns.selectedSlide.rowIndex = distancesToTip.rows.indexOf(Math.min.apply(null, distancesToTip.rows));
       };
 
 
-
-      ns.selectSlide = function(){
+      var selectSlide = function(){
         ns.selectedSlide.columnClass = posibleXPositionsReversed[ns.selectedSlide.columnIndex];
         ns.selectedSlide.rowClass = posibleYPositions[ns.selectedSlide.rowIndex];
-        drawFullBorder();
+        Canvas.drawFullBorder();
       };
 
       var findCenterPositionsOfAllSlides = function(){
@@ -194,34 +181,34 @@
 
       var bringToCenter = function (rowDistance, columnDistance) {
         if (rowDistance > 0) {
-          ns.slide(down);
+          slide(down);
           rowDistance--;
           bringToCenter(rowDistance, columnDistance);
 
         } else if (rowDistance < 0) {
-          ns.slide(up);
+          slide(up);
           rowDistance++;
           bringToCenter(rowDistance, columnDistance);
         
         } else {
 
           if (columnDistance > 0) {
-            ns.slide(left);
+            slide(left);
             columnDistance--;
             bringToCenter(rowDistance, columnDistance);
 
           } else if (columnDistance < 0) {
-            ns.slide(right);
+            slide(right);
             columnDistance++;
             bringToCenter(rowDistance, columnDistance);
           }
         }
       };
 
-      ns.zoomOut = function(){
+      var zoomOut = function(){
         ns.transitioning = true;
-        clearCanvas();
-        setStartingBorderAttributes();
+        Canvas.clearCanvas();
+        Canvas.setStartingBorderAttributes();
         $(".frame").toggleClass("zoomed-out");
         ns.zoomedOut = !ns.zoomedOut;
       };
@@ -240,7 +227,7 @@
         ns.transitioning = false;
       };
 
-      ns.zoomInOne = function(){
+      var zoomInOne = function(){
         var rowClassOffset = findRowClassOffset(ns.selectedSlide.rowClass);
         var columnClassOffset = findColumnClassOffset(ns.selectedSlide.columnClass);
 
@@ -248,27 +235,29 @@
         $(".frame").toggleClass("zoomed-out");
         ns.zoomedOut = !ns.zoomedOut;
         ns.transitioning = true;
-        clearCanvas();
+        Canvas.clearCanvas();
       };
 
       var adaptValuesToScreenSize = function(){
-        resizeCanvas();
+        Canvas.resizeCanvas();
 
         oneSlide = $slideDivs.first();
         ns.slidesSize = findElementsSize(oneSlide[0]);
         
         findCenterPositionsOfAllSlides();
-        setStartingBorderAttributes();
+        Canvas.setStartingBorderAttributes();
       };
+
+
 
 
       var init = function (){
         appendSlides();
 
-        resizeCanvas();
+        Canvas.resizeCanvas();
         findCenterPositionsOfAllSlides();
 
-        controller.on("frame", processFrame);
+        controller.on("frame", LeapActions.processFrame);
         controller.connect();
 
         window.onresize = adaptValuesToScreenSize;
@@ -291,26 +280,39 @@
           $(ns.body).on("keydown", function(key){
             switch(key.keyCode){
               case 37:
-                ns.slide(left);
+                slide(left);
                 break;
               case 38:
-                ns.slide(up);
+                slide(up);
                 break;
               case 39:
-                ns.slide(right);
+                slide(right);
                 break;
               case 40:
-                ns.slide(down);
+                slide(down);
                 break;
               case 90:
-                ns.zoomOut();
+                zoomOut();
                 break;
               case 67:
-                ns.zoomInOne();
+                zoomInOne();
                 break;
             }
           });
         }
+
+        ns.SliderObj = {
+        slide:                        slide,
+        findSlideDistanceToPosition:  findSlideDistanceToPosition,
+        getIndexesOfClosestSlide:     getIndexesOfClosestSlide,
+        selectSlide:                  selectSlide,
+        zoomOut:                      zoomOut,
+        zoomInOne:                    zoomInOne
+      };
+
+      console.log(ns);
+
+
       };
       init();
     };

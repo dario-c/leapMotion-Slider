@@ -15,8 +15,8 @@
         var init = function ()
         {
             ns.slider = new ns.Slider();
-            ns.canvas = new ns.Canvas();
-            ns.leapActions = new ns.LeapActions();
+            // ns.canvas = new ns.Canvas();
+            // ns.leapActions = new ns.LeapActions();
         };
 
         init();
