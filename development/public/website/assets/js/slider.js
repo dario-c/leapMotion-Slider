@@ -19,24 +19,18 @@
       var up = ns.up;
       var down = ns.down;
 
-
       // CANVAS FUNCTIONS
-      ns.CanvasObj = ns.Canvas();
       var Canvas = ns.CanvasObj;
 
       // LEAP FUNCTIONS
-      ns.LeapObj = ns.LeapActions();
       var LeapActions = ns.LeapObj;
 
-
       var $frame = $(".frame");
-      var $slideDivs;
       var oneSlide;
 
       // States Variables
       ns.transitioning = false;
       ns.zoomedOut = true;
-
 
 
       var posibleXPositions = ["rightest", "right", "middle", "left", "leftest" ];
@@ -76,8 +70,8 @@
           }
         }
         $frame.append(slides);
-        $slideDivs = $frame.find("div");
-        oneSlide = $slideDivs.first()[0];
+        ns.$slideDivs = $frame.find("div");
+        oneSlide = ns.$slideDivs.first()[0];
       };
 
       var slide = function(direction) {
@@ -153,7 +147,7 @@
         ns.columnsCenters = [];
         ns.rowsCenters = [];
 
-        $slideDivs.each(function(i){
+        ns.$slideDivs.each(function(i){
           if(i < columns.length){
             ns.columnsCenters.push(findElementsCenterPosition(this)[0]);
           }
@@ -241,7 +235,7 @@
       var adaptValuesToScreenSize = function(){
         Canvas.resizeCanvas();
 
-        oneSlide = $slideDivs.first();
+        oneSlide = ns.$slideDivs.first();
         ns.slidesSize = findElementsSize(oneSlide[0]);
         
         findCenterPositionsOfAllSlides();
@@ -250,66 +244,24 @@
 
 
       var init = function (){
-        appendSlides();
-
-        Canvas.resizeCanvas();
-        findCenterPositionsOfAllSlides();
-
-        LeapActions.controller.on("frame", LeapActions.processFrame);
-        LeapActions.controller.connect();
-
-        window.onresize = adaptValuesToScreenSize;
-
-        oneSlide = $slideDivs.first();
-        ns.slidesSize = findElementsSize(oneSlide[0]);
-        oneSlide.on("transitionend", endSliding);
-
-        // Just for Debugging 
-        if(ns.DEBUG){
-          $(document).ready(function(){
-            $(document.body).on("mouseover", function(e){
-              var elem = document.elementFromPoint(e.pageX, e.pageY);
-              
-              $slideDivs.removeClass("selected");
-              $(elem).addClass("selected");
-            });
-          });
-
-          $(ns.body).on("keydown", function(key){
-            switch(key.keyCode){
-              case 37:
-                slide(left);
-                break;
-              case 38:
-                slide(up);
-                break;
-              case 39:
-                slide(right);
-                break;
-              case 40:
-                slide(down);
-                break;
-              case 90:
-                zoomOut();
-                break;
-              case 67:
-                zoomInOne();
-                break;
-            }
-          });
-        }
-
-        ns.SliderObj = {
-        slide:                        slide,
-        findSlideDistanceToPosition:  findSlideDistanceToPosition,
-        getIndexesOfClosestSlide:     getIndexesOfClosestSlide,
-        selectSlide:                  selectSlide,
-        zoomOut:                      zoomOut,
-        zoomInOne:                    zoomInOne
-      };
 
       };
+
       init();
+
+      return {
+      appendSlides:                   appendSlides,
+      endSliding:                     endSliding,
+      slide:                          slide,
+      zoomOut:                        zoomOut,
+      zoomInOne:                      zoomInOne,
+      selectSlide:                    selectSlide,
+      findElementsSize:               findElementsSize,
+      adaptValuesToScreenSize:        adaptValuesToScreenSize,
+      getIndexesOfClosestSlide:       getIndexesOfClosestSlide,
+      findSlideDistanceToPosition:    findSlideDistanceToPosition,
+      findCenterPositionsOfAllSlides: findCenterPositionsOfAllSlides
+      };
     };
 
 })(window.Caviar);
