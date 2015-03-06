@@ -21,6 +21,8 @@
 
     var animatedBorders = {};
     var staticBorders = {};
+    var border = {};
+    var halfBorder;
     
     var distanceToBorder;
     
@@ -32,8 +34,8 @@
 
     var setStartingBorderAttributes = function(){
       clearCanvas();
-      ns.border = {};
-      ns.border.size = 13;
+      border = {};
+      border.size = 13;
       animatedBorders.leftLineLength = animatedBorders.rightLineLength = animatedBorders.bottomLineLength = 0;
       animatedBorders.topLineLength = -250;
     };
@@ -51,20 +53,20 @@
     var calculateBorders = function(animated){
       slideCenterX = ns.columnsCenters[ns.selectedSlide.columnIndex];
       slideCenterY = ns.rowsCenters[ns.selectedSlide.rowIndex];
-      ns.halfBorder = ns.border.size / 2;
-      distanceToBorder = (ns.slidesSize[0] / 2) + ns.halfBorder;
+      halfBorder = border.size / 2;
+      distanceToBorder = (ns.slidesSize[0] / 2) + halfBorder;
 
       var findBorders = animated ? findCornersAnimatedBorder : findCornersStaticBorder;
       findBorders();
     };
 
     var findCornersAnimatedBorder = function(){
-      animatedBorders.topLeftStart = [     slideCenterX - distanceToBorder - ns.halfBorder, slideCenterY - distanceToBorder];
-      animatedBorders.topRightStart = [    slideCenterX + distanceToBorder,              slideCenterY - distanceToBorder - ns.halfBorder];
-      animatedBorders.bottomRightStart = [ slideCenterX + distanceToBorder + ns.halfBorder, slideCenterY + distanceToBorder];
-      animatedBorders.bottomLeftStart = [  slideCenterX - distanceToBorder,              slideCenterY + distanceToBorder + ns.halfBorder];
+      animatedBorders.topLeftStart = [     slideCenterX - distanceToBorder - halfBorder, slideCenterY - distanceToBorder];
+      animatedBorders.topRightStart = [    slideCenterX + distanceToBorder,              slideCenterY - distanceToBorder - halfBorder];
+      animatedBorders.bottomRightStart = [ slideCenterX + distanceToBorder + halfBorder, slideCenterY + distanceToBorder];
+      animatedBorders.bottomLeftStart = [  slideCenterX - distanceToBorder,              slideCenterY + distanceToBorder + halfBorder];
 
-      squareSide = ns.slidesSize[0] + (ns.border.size * 2);
+      squareSide = ns.slidesSize[0] + (border.size * 2);
     };
 
     var findCornersStaticBorder = function(){
@@ -79,7 +81,7 @@
       ctx.beginPath();
       ctx.moveTo(start[0], start[1]);
       ctx.lineTo(finish[0], finish[1]);
-      ctx.lineWidth = ns.border.size;
+      ctx.lineWidth = border.size;
       ctx.strokeStyle = "white";
       ctx.stroke();
     };
@@ -91,9 +93,9 @@
       ctx.lineTo(staticBorders.topRightStart[0],    staticBorders.topRightStart[1]);
       ctx.lineTo(staticBorders.bottomRightStart[0], staticBorders.bottomRightStart[1]);
       ctx.lineTo(staticBorders.bottomLeftStart[0],  staticBorders.bottomLeftStart[1]);
-      ctx.lineTo(staticBorders.topLeftStart[0],     staticBorders.topLeftStart[1] - ns.halfBorder);
+      ctx.lineTo(staticBorders.topLeftStart[0],     staticBorders.topLeftStart[1] - halfBorder);
 
-      ctx.lineWidth = ns.border.size;
+      ctx.lineWidth = border.size;
       ctx.strokeStyle = "#BADA55";
       ctx.stroke();
     };
@@ -106,27 +108,27 @@
           animatedBorders.topLineLength += increment;
 
           if(animatedBorders.topLineLength >= 0){ // Ignore the offset given to delay animation
-            ns.border.toRight = [animatedBorders.topLeftStart[0] + animatedBorders.topLineLength, animatedBorders.topLeftStart[1]];
-            drawLine(animatedBorders.topLeftStart, ns.border.toRight);
+            border.toRight = [animatedBorders.topLeftStart[0] + animatedBorders.topLineLength, animatedBorders.topLeftStart[1]];
+            drawLine(animatedBorders.topLeftStart, border.toRight);
           }
           break;
 
         case (animatedBorders.rightLineLength + incrementThreshold) < squareSide:
           animatedBorders.rightLineLength += increment;
-          ns.border.toBottom = [ slideCenterX + distanceToBorder, slideCenterY - distanceToBorder - ns.halfBorder + animatedBorders.rightLineLength ];
-          drawLine(animatedBorders.topRightStart, ns.border.toBottom);
+          border.toBottom = [ slideCenterX + distanceToBorder, slideCenterY - distanceToBorder - halfBorder + animatedBorders.rightLineLength ];
+          drawLine(animatedBorders.topRightStart, border.toBottom);
           break;
 
         case (animatedBorders.bottomLineLength + incrementThreshold) < squareSide:
           animatedBorders.bottomLineLength += increment;
-          ns.border.toLeft = [slideCenterX + distanceToBorder + ns.halfBorder - animatedBorders.bottomLineLength , slideCenterY + distanceToBorder ];
-          drawLine(animatedBorders.bottomRightStart, ns.border.toLeft);
+          border.toLeft = [slideCenterX + distanceToBorder + halfBorder - animatedBorders.bottomLineLength , slideCenterY + distanceToBorder ];
+          drawLine(animatedBorders.bottomRightStart, border.toLeft);
           break;
 
         case (animatedBorders.leftLineLength + incrementThreshold) < squareSide:
           animatedBorders.leftLineLength += increment;
-          ns.border.toTop = [  slideCenterX - distanceToBorder, slideCenterY + distanceToBorder + ns.halfBorder - animatedBorders.leftLineLength ];
-          drawLine(animatedBorders.bottomLeftStart, ns.border.toTop);
+          border.toTop = [  slideCenterX - distanceToBorder, slideCenterY + distanceToBorder + halfBorder - animatedBorders.leftLineLength ];
+          drawLine(animatedBorders.bottomLeftStart, border.toTop);
           break;
         default:
           ns.SliderObj.zoomInOne();

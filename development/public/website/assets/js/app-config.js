@@ -8,40 +8,24 @@ window.Caviar = window.Caviar || {};
     ns.DEBUG = true;
     ns.body = document.body;
 
-    ns.border = {};
-
+    // Shared By Slider and Canvas
     ns.columnsCenters = undefined;
     ns.rowsCenters = undefined;
     ns.slideSize = undefined;
 
-    ns.selectedSlide = {};
-
-
-    ns.wrap = $("#wrap")[0];
-    ns.wrapAttr = ns.wrap.getBoundingClientRect();
-
+    // Shared By Slider and Leap
     ns.transitioning = false;
     ns.zoomedOut = true;
 
-    // ns.zoomInOne = undefined;
-    // ns.processZoomedOutFrame = undefined;
-    // ns.processZoomedInFrame = undefined;
-    // ns.slide = undefined;
-    // ns.findSlideDistanceToPosition = undefined;
-    // ns.getIndexesOfClosestSlide = undefined;
-
-    ns.controller = new Leap.Controller();
-    
-    ns.staticBorders = {};
-    ns.halfBorder = undefined;
-
+    // Shared by all
+    ns.selectedSlide = {};
+    ns.wrap = $("#wrap")[0];
+    ns.wrapAttr = ns.wrap.getBoundingClientRect();
 
     ns.left = "left";
     ns.right = "right";
     ns.up = "up";
     ns.down = "down";
-
-
 
     // Events that can get dispatched
     ns.eventNames = {

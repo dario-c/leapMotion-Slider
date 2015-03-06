@@ -18,6 +18,7 @@
     // CANVAS FUNCTIONS
     var Canvas = ns.CanvasObj;
 
+    var controller = new Leap.Controller();
 
 
 
@@ -58,7 +59,7 @@
 
 
     var processMainHand = function(hand, frame){
-      var translation = hand.translation(ns.controller.frame(10));
+      var translation = hand.translation(controller.frame(10));
       var translationX = translation[0];
       var translationY = translation[1];
 
@@ -115,7 +116,8 @@
     init();
 
     return {
-      processFrame: processFrame
+      processFrame: processFrame,
+      controller: controller
     };
   };
 

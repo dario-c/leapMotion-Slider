@@ -249,16 +249,14 @@
       };
 
 
-
-
       var init = function (){
         appendSlides();
 
         Canvas.resizeCanvas();
         findCenterPositionsOfAllSlides();
 
-        controller.on("frame", LeapActions.processFrame);
-        controller.connect();
+        LeapActions.controller.on("frame", LeapActions.processFrame);
+        LeapActions.controller.connect();
 
         window.onresize = adaptValuesToScreenSize;
 
@@ -309,9 +307,6 @@
         zoomOut:                      zoomOut,
         zoomInOne:                    zoomInOne
       };
-
-      console.log(ns);
-
 
       };
       init();
