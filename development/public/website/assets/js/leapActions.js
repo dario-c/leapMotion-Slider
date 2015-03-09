@@ -14,12 +14,11 @@
     var translationThreshold = 165;
     var lastSelectedIndexes = [];
 
-
-    // CANVAS FUNCTIONS
+    // EXTERNAL MODULES
     var Canvas = ns.CanvasObj;
 
-    var controller = new Leap.Controller();
 
+    var controller = new Leap.Controller();
 
 
     var processFrame = function(frame){
@@ -33,8 +32,6 @@
       processPointingFinger(frame);
     };
 
-
-
     var processZoomedInFrame = function(frame){
       var hand = frame.hands[0];
 
@@ -43,7 +40,6 @@
       }
       processMainHand(hand, frame);
     };
-
 
     var processTwoHands = function(hand, frame){
       var hand2 = frame.hands[1];
@@ -54,9 +50,6 @@
         ns.SliderObj.zoomOut();
       }
     };
-
-
-
 
     var processMainHand = function(hand, frame){
       var translation = hand.translation(controller.frame(10));
@@ -109,15 +102,9 @@
     };
 
 
-    var init = function (){
-     
-    };
-    
-    init();
-
     return {
-      processFrame: processFrame,
-      controller: controller
+      controller: controller,
+      processFrame: processFrame
     };
   };
 

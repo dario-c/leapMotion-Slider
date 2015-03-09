@@ -18,7 +18,6 @@
     var canvas = $(".feedback-canvas")[0];
     var ctx = canvas.getContext("2d");
 
-
     var animatedBorders = {};
     var staticBorders = {};
     var border = {};
@@ -74,7 +73,6 @@
       staticBorders.topRightStart = [    slideCenterX + distanceToBorder, slideCenterY - distanceToBorder];
       staticBorders.bottomRightStart = [ slideCenterX + distanceToBorder, slideCenterY + distanceToBorder];
       staticBorders.bottomLeftStart = [  slideCenterX - distanceToBorder, slideCenterY + distanceToBorder];
-      // console.log(staticBorders);
     };
 
     var drawLine = function(start, finish){
@@ -87,7 +85,6 @@
     };
 
     var drawFullBorder = function(){
-      // console.log(staticBorders);
       ctx.beginPath();
       ctx.moveTo(staticBorders.topLeftStart[0],     staticBorders.topLeftStart[1]);
       ctx.lineTo(staticBorders.topRightStart[0],    staticBorders.topRightStart[1]);
@@ -99,7 +96,6 @@
       ctx.strokeStyle = "#BADA55";
       ctx.stroke();
     };
-
 
     var animateBorder = function(){
       switch(true){
@@ -136,11 +132,6 @@
       }
     };
 
-
-    var init = function (){
-    };
-
-    init();
 
     return {
       clearCanvas:                  clearCanvas,
