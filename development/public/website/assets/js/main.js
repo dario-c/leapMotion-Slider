@@ -40,6 +40,10 @@
 
       // Listen To Events
       LeapActions.controller.on("frame", LeapActions.processFrame);
+      LeapActions.controller.on("deviceStopped", LeapActions.leapDisconnected);
+      LeapActions.controller.on("deviceStreaming", LeapActions.leapConnected);
+
+
       LeapActions.controller.connect();
 
       window.onresize = Slider.adaptValuesToScreenSize;

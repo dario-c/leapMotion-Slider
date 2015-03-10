@@ -20,6 +20,15 @@
 
     var controller = new Leap.Controller();
 
+    var leapDisconnected = function(){
+      $(ns.body).addClass("alert");
+      console.log("disconected");
+    };
+
+    var leapConnected = function(){
+      $(ns.body).removeClass("alert");
+      console.log("conected");
+    };
 
     var processFrame = function(frame){
       if(frame.hands.length > 0 && !ns.transitioning){
@@ -104,7 +113,9 @@
 
     return {
       controller: controller,
-      processFrame: processFrame
+      processFrame: processFrame,
+      leapConnected: leapConnected,
+      leapDisconnected: leapDisconnected
     };
   };
 
