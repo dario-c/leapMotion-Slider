@@ -15,9 +15,6 @@
         var init = function ()
         {
             ns.main = new ns.Main();
-            // ns.slider = new ns.Slider();
-            // ns.canvas = new ns.Canvas();
-            // ns.leapActions = new ns.LeapActions();
         };
 
         init();
